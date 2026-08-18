@@ -16,33 +16,28 @@ public sealed class WindowsRegistryTweakExecutor : ITweakExecutor
 
         var snapshots = new List<RegistrySnapshot>();
 
-        try
+        foreach (var change in tweak.RegistryChanges)
         {
-            foreach (var change in tweak.RegistryChanges)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                using var baseKey = RegistryKey.OpenBaseKey(ParseHive(change.Root), RegistryView.Default);
-                using var key = baseKey.CreateSubKey(change.KeyPath, writable: true)
-                    ?? throw new InvalidOperationException($"Unable to open registry key '{change.KeyPath}'.");
+            cancellationToken.ThrowIfCancellationRequested();
+            using var baseKey = RegistryKey.OpenBaseKey(ParseHive(change.Root), RegistryView.Default);
+            using var key = baseKey.CreateSubKey(change.KeyPath, writable: true)
+                ?? throw new InvalidOperationException($"Unable to open registry key '{change.KeyPath}'.");
 
-                var existed = key.GetValueNames().Contains(change.ValueName, StringComparer.OrdinalIgnoreCase);
-                var previous = existed ? key.GetValue(change.ValueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames) : null;
-                var previousKind = existed ? key.GetValueKind(change.ValueName) : (RegistryValueKind?)null;
+            var existed = key.GetValueNames().Contains(change.ValueName, StringComparer.OrdinalIgnoreCase);
+            var previous = existed
+                ? key.GetValue(change.ValueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames)
+                : null;
+            var previousKind = existed ? key.GetValueKind(change.ValueName) : (RegistryValueKind?)null;
 
-                snapshots.Add(new RegistrySnapshot(
-                    change.Root,
-                    change.KeyPath,
-                    change.ValueName,
-                    existed,
-                    previousKind?.ToString(),
-                    previous));
+            snapshots.Add(new RegistrySnapshot(
+                change.Root,
+                change.KeyPath,
+                change.ValueName,
+                existed,
+                previousKind?.ToString(),
+                previous));
 
-                key.SetValue(change.ValueName, ParseValue(change.ValueType, change.ValueData), ParseKind(change.ValueType));
-            }
-        }
-        catch
-        {
-            throw;
+            key.SetValue(change.ValueName, ParseValue(change.ValueType, change.ValueData), ParseKind(change.ValueType));
         }
 
         return Task.FromResult(new StateSnapshot(Guid.NewGuid(), DateTimeOffset.UtcNow, tweak.Name, snapshots));
@@ -66,6 +61,9 @@ public sealed class WindowsRegistryTweakExecutor : ITweakExecutor
                 key.DeleteValue(item.ValueName, throwOnMissingValue: false);
                 continue;
             }
+
+            if (item.ValueData is null)
+                throw new InvalidOperationException($"Snapshot '{snapshot.Id}' does not contain a restorable value for '{item.ValueName}'.");
 
             var kind = Enum.TryParse<RegistryValueKind>(item.ValueType, ignoreCase: true, out var parsed)
                 ? parsed
