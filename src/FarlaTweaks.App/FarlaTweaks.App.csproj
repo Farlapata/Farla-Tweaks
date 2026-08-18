@@ -8,4 +8,8 @@
     <RootNamespace>FarlaTweaks</RootNamespace>
     <AssemblyName>FarlaTweaks</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FarlaTweaks.Core\FarlaTweaks.Core.csproj" />
+  </ItemGroup>
 </Project>
