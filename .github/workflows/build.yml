@@ -25,12 +25,19 @@ jobs:
       - name: Build
         run: dotnet build FarlaTweaks.sln --configuration Release --no-restore
 
-      - name: Publish test build
-        run: dotnet publish src/FarlaTweaks.App/FarlaTweaks.App.csproj --configuration Release --output artifacts/FarlaTweaks --self-contained false
+      - name: Publish self-contained Windows build
+        run: >-
+          dotnet publish src/FarlaTweaks.App/FarlaTweaks.App.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --output artifacts/FarlaTweaks
+          -p:PublishSingleFile=false
+          -p:PublishTrimmed=false
 
-      - name: Upload test build
+      - name: Upload Windows test build
         uses: actions/upload-artifact@v4
         with:
-          name: FarlaTweaks-test-build
+          name: FarlaTweaks-Windows-x64
           path: artifacts/FarlaTweaks/
           if-no-files-found: error
