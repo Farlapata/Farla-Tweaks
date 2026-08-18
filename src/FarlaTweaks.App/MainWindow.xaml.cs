@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using FarlaTweaks.Core.Database;
 using FarlaTweaks.Core.Diagnostics;
 using FarlaTweaks.Core.Models;
 using FarlaTweaks.Core.Persistence;
+using FarlaTweaks.Core.Recommendations;
 
 namespace FarlaTweaks.App;
 
@@ -12,6 +15,8 @@ public partial class MainWindow : Window
 {
     private readonly SystemProfileCollector _profileCollector = new();
     private readonly ProfileStore _profileStore = new();
+    private readonly TweakCatalogLoader _catalogLoader = new();
+    private readonly RecommendationEngine _recommendationEngine = new();
     private SystemProfile? _profile;
 
     public MainWindow()
@@ -30,7 +35,7 @@ public partial class MainWindow : Window
             _profile = await _profileStore.LoadAsync();
             if (_profile is not null)
             {
-                ApplyProfileToDashboard(_profile, persisted: true);
+                await ApplyProfileToDashboardAsync(_profile, persisted: true);
             }
         }
         catch
@@ -56,18 +61,20 @@ public partial class MainWindow : Window
         StartAnalysisButton.Content = "ANALYZING...";
         AnalysisDescriptionText.Text = "Reading your system. No settings are being changed.";
         ScoreStatusText.Text = "ANALYZING";
+        CopilotStatusText.Text = "Reading your system profile.";
 
         try
         {
             _profile = await Task.Run(_profileCollector.Collect);
             await _profileStore.SaveAsync(_profile);
-            ApplyProfileToDashboard(_profile, persisted: false);
+            await ApplyProfileToDashboardAsync(_profile, persisted: false);
         }
         catch (Exception ex)
         {
             ScoreStatusText.Text = "SCAN FAILED";
             ScoreDescriptionText.Text = "Farla could not complete the system scan.";
             AnalysisDescriptionText.Text = ex.Message;
+            CopilotStatusText.Text = "Analysis failed. No changes were made.";
             StartAnalysisButton.IsEnabled = true;
             StartAnalysisButton.Content = "TRY AGAIN";
             return;
@@ -76,11 +83,11 @@ public partial class MainWindow : Window
         StartAnalysisButton.Content = "SYSTEM ANALYZED";
     }
 
-    private void ApplyProfileToDashboard(SystemProfile profile, bool persisted)
+    private async Task ApplyProfileToDashboardAsync(SystemProfile profile, bool persisted)
     {
         ScoreStatusText.Text = "ANALYZED";
         ScoreDescriptionText.Text = persisted
-            ? "Farla remembered your last system analysis. Run it again to refresh the profile."
+            ? "Farla remembered your last system analysis. Refresh it whenever your hardware or Windows setup changes."
             : "System profile captured. Farla is ready to evaluate compatibility and recommendations.";
         AnalysisDescriptionText.Text = BuildProfileSummary(profile);
 
@@ -88,6 +95,26 @@ public partial class MainWindow : Window
         StabilityValueText.Text = $"Stability        {profile.Architecture}";
         GamingValueText.Text = $"Gaming          {profile.Gpu}";
         NetworkValueText.Text = $"Network        {profile.OsVersion}";
+
+        try
+        {
+            var tweaks = await _catalogLoader.LoadAsync();
+            var recommendations = _recommendationEngine.Build(profile, tweaks, Array.Empty<string>());
+            RecommendationEyebrowText.Text = "RECOMMENDATION ENGINE";
+            RecommendationTitleText.Text = recommendations.Count == 0
+                ? "No compatible recommendations yet."
+                : $"{recommendations.Count} compatible recommendations are ready to review.";
+            AnalysisDescriptionText.Text = $"{BuildProfileSummary(profile)} Farla found {recommendations.Count} compatible catalog entries and did not apply any of them.";
+            CopilotStatusText.Text = recommendations.Count == 0
+                ? "Monitoring your system. Nothing requires action yet."
+                : "Profile analyzed. Recommendations are ready for review.";
+        }
+        catch
+        {
+            RecommendationEyebrowText.Text = "RECOMMENDATION ENGINE";
+            RecommendationTitleText.Text = "System analyzed. Recommendation catalog unavailable.";
+            CopilotStatusText.Text = "Profile captured. Recommendation engine needs attention.";
+        }
 
         StartAnalysisButton.IsEnabled = true;
         StartAnalysisButton.Content = "REFRESH SYSTEM ANALYSIS";
