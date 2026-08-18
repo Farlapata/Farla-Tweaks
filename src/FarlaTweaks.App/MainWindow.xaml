@@ -78,7 +78,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0" Content="Overview" Style="{StaticResource NavButtonStyle}" />
+                    <Button Grid.Column="0" Content="Overview" Style="{StaticResource ActiveNavButtonStyle}" />
                     <Button Grid.Column="1" Content="Optimize" Style="{StaticResource NavButtonStyle}" />
                     <Button Grid.Column="2" Content="Games" Style="{StaticResource NavButtonStyle}" />
                     <Button Grid.Column="3" Content="Monitor" Style="{StaticResource NavButtonStyle}" />
