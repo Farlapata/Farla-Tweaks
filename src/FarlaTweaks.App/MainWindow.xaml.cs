@@ -29,18 +29,14 @@ public partial class MainWindow : Window
     private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
     {
         Loaded -= MainWindow_OnLoaded;
-
         try
         {
             _profile = await _profileStore.LoadAsync();
             if (_profile is not null)
-            {
                 await ApplyProfileToDashboardAsync(_profile, persisted: true);
-            }
         }
         catch
         {
-            // A missing or unreadable profile must never prevent Farla from starting.
         }
     }
 
@@ -126,6 +122,15 @@ public partial class MainWindow : Window
         var gpu = string.IsNullOrWhiteSpace(profile.Gpu) ? "Unknown GPU" : profile.Gpu;
         var memory = profile.RamGb > 0 ? $"{profile.RamGb} GB RAM" : "RAM unavailable";
         return $"Detected {cpu}, {gpu}, {memory}. Nothing was modified.";
+    }
+
+    private void OptimizeButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var review = new RecommendationReview
+        {
+            Owner = this
+        };
+        review.ShowDialog();
     }
 
     private void WindowDragArea_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
