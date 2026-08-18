@@ -24,3 +24,13 @@ jobs:
 
       - name: Build
         run: dotnet build FarlaTweaks.sln --configuration Release --no-restore
+
+      - name: Publish test build
+        run: dotnet publish src/FarlaTweaks.App/FarlaTweaks.App.csproj --configuration Release --output artifacts/FarlaTweaks --self-contained false
+
+      - name: Upload test build
+        uses: actions/upload-artifact@v4
+        with:
+          name: FarlaTweaks-test-build
+          path: artifacts/FarlaTweaks/
+          if-no-files-found: error
