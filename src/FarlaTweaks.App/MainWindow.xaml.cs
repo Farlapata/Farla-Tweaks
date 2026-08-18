@@ -65,4 +65,13 @@ public partial class MainWindow : Window
     {
         Close();
     }
+
+    private void StartWizardButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var wizard = new SetupWizard
+        {
+            Owner = this
+        };
+        wizard.ShowDialog();
+    }
 }
