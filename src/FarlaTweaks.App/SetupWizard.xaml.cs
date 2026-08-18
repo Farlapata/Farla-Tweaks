@@ -3,8 +3,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using FarlaTweaks.Core.Compatibility;
 using FarlaTweaks.Core.Database;
+using FarlaTweaks.Core.Diagnostics;
 using FarlaTweaks.Core.Models;
-using FarlaTweaks.Core.System;
 
 namespace FarlaTweaks.App;
 
@@ -72,23 +72,29 @@ public partial class SetupWizard : Window
 
         try
         {
-            var scanner = new WindowsSystemProfileScanner();
-            var detectedProfile = await Task.Run(scanner.Scan);
-
-            var capabilities = new List<string>();
-            if (CrosshairBox.IsChecked == true)
-                capabilities.Add("crosshair-x");
-            else
-                capabilities.Add("game-bar-unused");
+            var detectedProfile = await Task.Run(() => new SystemProfileCollector().Collect());
+            var userCapabilities = new List<string>
+            {
+                CrosshairBox.IsChecked == true ? "crosshair-x" : "game-bar-unused"
+            };
 
             if (ObsBox.IsChecked == true)
-                capabilities.Add("obs");
+                userCapabilities.Add("obs");
             if (DiscordBox.IsChecked == true)
-                capabilities.Add("discord-overlay");
+                userCapabilities.Add("discord-overlay");
+            if (OutplayedBox.IsChecked == true)
+                userCapabilities.Add("recording");
+            if (AfterburnerBox.IsChecked == true)
+                userCapabilities.Add("afterburner");
+            if (WallpaperEngineBox.IsChecked == true)
+                userCapabilities.Add("wallpaper-engine");
 
             var profile = detectedProfile with
             {
-                Capabilities = capabilities
+                Capabilities = detectedProfile.Capabilities
+                    .Concat(userCapabilities)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray()
             };
 
             var catalog = await new TweakCatalogLoader().LoadAsync();
@@ -101,10 +107,7 @@ public partial class SetupWizard : Window
                 .Select(x => x.Tweak)
                 .ToList();
 
-            var game = GameBox.Text;
-            var gaming = compatible.Where(t => t.Tags.Contains("gaming", StringComparer.OrdinalIgnoreCase)).ToList();
-
-            PlanSummary.Text = $"{compatible.Count} compatible recommendations for {game}.";
+            PlanSummary.Text = $"{compatible.Count} compatible recommendations for {GameBox.Text}.";
             foreach (var tweak in compatible.Take(6))
             {
                 var risk = tweak.Risk == RiskLevel.Safe ? "Safe" : "Review";
