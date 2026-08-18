@@ -4,18 +4,39 @@ using System.Windows;
 using System.Windows.Input;
 using FarlaTweaks.Core.Diagnostics;
 using FarlaTweaks.Core.Models;
+using FarlaTweaks.Core.Persistence;
 
 namespace FarlaTweaks.App;
 
 public partial class MainWindow : Window
 {
     private readonly SystemProfileCollector _profileCollector = new();
+    private readonly ProfileStore _profileStore = new();
     private SystemProfile? _profile;
 
     public MainWindow()
     {
         InitializeComponent();
         UpdateGreeting();
+        Loaded += MainWindow_OnLoaded;
+    }
+
+    private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= MainWindow_OnLoaded;
+
+        try
+        {
+            _profile = await _profileStore.LoadAsync();
+            if (_profile is not null)
+            {
+                ApplyProfileToDashboard(_profile, persisted: true);
+            }
+        }
+        catch
+        {
+            // A missing or unreadable profile must never prevent Farla from starting.
+        }
     }
 
     private void UpdateGreeting()
@@ -39,15 +60,8 @@ public partial class MainWindow : Window
         try
         {
             _profile = await Task.Run(_profileCollector.Collect);
-
-            ScoreStatusText.Text = "ANALYZED";
-            ScoreDescriptionText.Text = "System profile captured. Farla is ready to evaluate compatibility and recommendations.";
-            AnalysisDescriptionText.Text = BuildProfileSummary(_profile);
-
-            PerformanceValueText.Text = $"Performance   {_profile.RamGb} GB RAM";
-            StabilityValueText.Text = $"Stability        {_profile.Architecture}";
-            GamingValueText.Text = $"Gaming          {_profile.Gpu}";
-            NetworkValueText.Text = $"Network        {_profile.OsVersion}";
+            await _profileStore.SaveAsync(_profile);
+            ApplyProfileToDashboard(_profile, persisted: false);
         }
         catch (Exception ex)
         {
@@ -60,6 +74,23 @@ public partial class MainWindow : Window
         }
 
         StartAnalysisButton.Content = "SYSTEM ANALYZED";
+    }
+
+    private void ApplyProfileToDashboard(SystemProfile profile, bool persisted)
+    {
+        ScoreStatusText.Text = "ANALYZED";
+        ScoreDescriptionText.Text = persisted
+            ? "Farla remembered your last system analysis. Run it again to refresh the profile."
+            : "System profile captured. Farla is ready to evaluate compatibility and recommendations.";
+        AnalysisDescriptionText.Text = BuildProfileSummary(profile);
+
+        PerformanceValueText.Text = $"Performance   {profile.RamGb} GB RAM";
+        StabilityValueText.Text = $"Stability        {profile.Architecture}";
+        GamingValueText.Text = $"Gaming          {profile.Gpu}";
+        NetworkValueText.Text = $"Network        {profile.OsVersion}";
+
+        StartAnalysisButton.IsEnabled = true;
+        StartAnalysisButton.Content = "REFRESH SYSTEM ANALYSIS";
     }
 
     private static string BuildProfileSummary(SystemProfile profile)
