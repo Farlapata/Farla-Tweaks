@@ -52,5 +52,19 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="WizardCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource FarlaText}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,20,14" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{StaticResource FarlaText}" />
+            <Setter Property="Background" Value="{StaticResource FarlaSurface}" />
+            <Setter Property="BorderBrush" Value="{StaticResource FarlaBorder}" />
+            <Setter Property="Padding" Value="10,7" />
+        </Style>
     </Application.Resources>
 </Application>
