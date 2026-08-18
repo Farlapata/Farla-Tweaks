@@ -23,138 +23,46 @@
                 <RowDefinition Height="52" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-
             <Grid Grid.Row="0" Background="{StaticResource FarlaBackground}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="220" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="150" />
-                </Grid.ColumnDefinitions>
-
+                <Grid.ColumnDefinitions><ColumnDefinition Width="220" /><ColumnDefinition Width="*" /><ColumnDefinition Width="150" /></Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
-                    <TextBlock Text="FARLA"
-                               Foreground="{StaticResource FarlaText}"
-                               FontSize="22"
-                               FontWeight="SemiBold" />
-                    <TextBlock Text=" / TWEAKS"
-                               Foreground="{StaticResource FarlaMuted}"
-                               FontSize="13"
-                               VerticalAlignment="Bottom"
-                               Margin="6,0,0,4" />
+                    <TextBlock Text="FARLA" Foreground="{StaticResource FarlaText}" FontSize="22" FontWeight="SemiBold" />
+                    <TextBlock Text=" / TWEAKS" Foreground="{StaticResource FarlaMuted}" FontSize="13" VerticalAlignment="Bottom" Margin="6,0,0,4" />
                 </StackPanel>
-
-                <StackPanel Grid.Column="2"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Margin="0,0,12,0">
-                    <Button Content="−"
-                            Width="42"
-                            Height="32"
-                            Style="{StaticResource NavButtonStyle}"
-                            ToolTip="Minimize"
-                            Click="MinimizeButton_OnClick" />
-                    <Button Content="×"
-                            Width="42"
-                            Height="32"
-                            Style="{StaticResource NavButtonStyle}"
-                            ToolTip="Close"
-                            Click="CloseButton_OnClick" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <Button Content="−" Width="42" Height="32" Style="{StaticResource NavButtonStyle}" ToolTip="Minimize" Click="MinimizeButton_OnClick" />
+                    <Button Content="×" Width="42" Height="32" Style="{StaticResource NavButtonStyle}" ToolTip="Close" Click="CloseButton_OnClick" />
                 </StackPanel>
             </Grid>
-
-            <Border Grid.Row="1"
-                    Background="#0D1015"
-                    BorderBrush="{StaticResource FarlaBorder}"
-                    BorderThickness="0,1,0,1">
+            <Border Grid.Row="1" Background="#0D1015" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="0,1,0,1">
                 <Grid Margin="18,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="Overview" Style="{StaticResource ActiveNavButtonStyle}" />
-                    <Button Grid.Column="1" Content="Optimize" Style="{StaticResource NavButtonStyle}" />
+                    <Button Grid.Column="1" Content="Optimize" Style="{StaticResource NavButtonStyle}" Click="OptimizeButton_OnClick" />
                     <Button Grid.Column="2" Content="Games" Style="{StaticResource NavButtonStyle}" />
                     <Button Grid.Column="3" Content="Monitor" Style="{StaticResource NavButtonStyle}" />
                     <Button Grid.Column="4" Content="History" Style="{StaticResource NavButtonStyle}" />
                     <Button Grid.Column="5" Content="Settings" Style="{StaticResource NavButtonStyle}" />
-
-                    <StackPanel Grid.Column="6"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                Margin="0,0,6,0">
+                    <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0">
                         <Ellipse Width="7" Height="7" Fill="{StaticResource FarlaSuccess}" Margin="0,0,7,0" />
-                        <TextBlock Text="PROTECTED"
-                                   Foreground="{StaticResource FarlaMuted}"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center" />
+                        <TextBlock Text="PROTECTED" Foreground="{StaticResource FarlaMuted}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
                     </StackPanel>
                 </Grid>
             </Border>
-
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden">
                 <StackPanel Margin="58,44,58,48">
-                    <TextBlock x:Name="GreetingText"
-                               Foreground="{StaticResource FarlaText}"
-                               FontSize="34"
-                               FontWeight="SemiBold" />
-                    <TextBlock x:Name="SubtitleText"
-                               Text="Your PC is ready"
-                               Foreground="{StaticResource FarlaMuted}"
-                               FontSize="16"
-                               Margin="0,8,0,30" />
-
+                    <TextBlock x:Name="GreetingText" Foreground="{StaticResource FarlaText}" FontSize="34" FontWeight="SemiBold" />
+                    <TextBlock x:Name="SubtitleText" Text="Your PC is ready" Foreground="{StaticResource FarlaMuted}" FontSize="16" Margin="0,8,0,30" />
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1.05*" />
-                            <ColumnDefinition Width="18" />
-                            <ColumnDefinition Width="1.35*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0"
-                                Background="{StaticResource FarlaSurface}"
-                                BorderBrush="{StaticResource FarlaBorder}"
-                                BorderThickness="1"
-                                CornerRadius="14"
-                                Padding="24">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="1.05*" /><ColumnDefinition Width="18" /><ColumnDefinition Width="1.35*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14" Padding="24">
                             <StackPanel>
-                                <TextBlock Text="FARLA SCORE"
-                                           Foreground="{StaticResource FarlaMuted}"
-                                           FontSize="11"
-                                           FontWeight="SemiBold" />
-                                <TextBlock x:Name="ScoreText"
-                                           Text="--"
-                                           Foreground="{StaticResource FarlaText}"
-                                           FontSize="68"
-                                           FontWeight="Bold"
-                                           Margin="0,8,0,0" />
-                                <TextBlock x:Name="ScoreStatusText"
-                                           Text="NOT ANALYZED"
-                                           Foreground="{StaticResource FarlaAccent}"
-                                           FontSize="12"
-                                           FontWeight="SemiBold" />
-                                <TextBlock x:Name="ScoreDescriptionText"
-                                           Text="Farla will calculate your score after it understands your system."
-                                           Foreground="{StaticResource FarlaMuted}"
-                                           FontSize="13"
-                                           TextWrapping="Wrap"
-                                           Margin="0,12,0,18" />
-
+                                <TextBlock Text="FARLA SCORE" Foreground="{StaticResource FarlaMuted}" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock x:Name="ScoreText" Text="--" Foreground="{StaticResource FarlaText}" FontSize="68" FontWeight="Bold" Margin="0,8,0,0" />
+                                <TextBlock x:Name="ScoreStatusText" Text="NOT ANALYZED" Foreground="{StaticResource FarlaAccent}" FontSize="12" FontWeight="SemiBold" />
+                                <TextBlock x:Name="ScoreDescriptionText" Text="Farla will calculate your score after it understands your system." Foreground="{StaticResource FarlaMuted}" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,18" />
                                 <Grid Margin="0,4,0,0">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                                     <TextBlock x:Name="PerformanceValueText" Grid.Row="0" Text="Performance   --" Foreground="{StaticResource FarlaMuted}" FontSize="12" />
                                     <TextBlock x:Name="StabilityValueText" Grid.Row="1" Text="Stability        --" Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,8,0,0" />
                                     <TextBlock x:Name="GamingValueText" Grid.Row="2" Text="Gaming          --" Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,8,0,0" />
@@ -162,76 +70,26 @@
                                 </Grid>
                             </StackPanel>
                         </Border>
-
-                        <Border Grid.Column="2"
-                                Background="{StaticResource FarlaSurface}"
-                                BorderBrush="{StaticResource FarlaBorder}"
-                                BorderThickness="1"
-                                CornerRadius="14"
-                                Padding="24">
+                        <Border Grid.Column="2" Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14" Padding="24">
                             <StackPanel>
-                                <TextBlock Text="FORTNITE"
-                                           Foreground="{StaticResource FarlaMuted}"
-                                           FontSize="11"
-                                           FontWeight="SemiBold" />
-                                <TextBlock Text="NOT DETECTED"
-                                           Foreground="{StaticResource FarlaText}"
-                                           FontSize="28"
-                                           FontWeight="SemiBold"
-                                           Margin="0,14,0,4" />
-                                <TextBlock Text="Launch Fortnite once and Farla will recognize it."
-                                           Foreground="{StaticResource FarlaMuted}"
-                                           FontSize="13"
-                                           TextWrapping="Wrap" />
-                                <Button Content="SET UP FORTNITE"
-                                        Style="{StaticResource PrimaryButtonStyle}"
-                                        HorizontalAlignment="Left"
-                                        Margin="0,22,0,0" />
+                                <TextBlock Text="FORTNITE" Foreground="{StaticResource FarlaMuted}" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock Text="NOT DETECTED" Foreground="{StaticResource FarlaText}" FontSize="28" FontWeight="SemiBold" Margin="0,14,0,4" />
+                                <TextBlock Text="Launch Fortnite once and Farla will recognize it." Foreground="{StaticResource FarlaMuted}" FontSize="13" TextWrapping="Wrap" />
+                                <Button Content="SET UP FORTNITE" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Left" Margin="0,22,0,0" />
                             </StackPanel>
                         </Border>
                     </Grid>
-
-                    <TextBlock Text="FARLA COPILOT"
-                               Foreground="{StaticResource FarlaText}"
-                               FontSize="18"
-                               FontWeight="SemiBold"
-                               Margin="0,34,0,12" />
+                    <TextBlock Text="FARLA COPILOT" Foreground="{StaticResource FarlaText}" FontSize="18" FontWeight="SemiBold" Margin="0,34,0,12" />
                     <StackPanel Orientation="Horizontal">
                         <Ellipse Width="7" Height="7" Fill="{StaticResource FarlaSuccess}" Margin="0,5,8,0" />
-                        <TextBlock x:Name="CopilotStatusText"
-                                   Text="Waiting for your first system analysis."
-                                   Foreground="{StaticResource FarlaMuted}"
-                                   FontSize="13" />
+                        <TextBlock x:Name="CopilotStatusText" Text="Waiting for your first system analysis." Foreground="{StaticResource FarlaMuted}" FontSize="13" />
                     </StackPanel>
-
-                    <Border Background="{StaticResource FarlaSurface}"
-                            BorderBrush="{StaticResource FarlaBorder}"
-                            BorderThickness="1"
-                            CornerRadius="14"
-                            Padding="22"
-                            Margin="0,22,0,0">
+                    <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14" Padding="22" Margin="0,22,0,0">
                         <StackPanel>
-                            <TextBlock x:Name="RecommendationEyebrowText"
-                                       Text="NEXT STEP"
-                                       Foreground="{StaticResource FarlaMuted}"
-                                       FontSize="11"
-                                       FontWeight="SemiBold" />
-                            <TextBlock x:Name="RecommendationTitleText"
-                                       Text="Let Farla understand your PC before changing anything."
-                                       Foreground="{StaticResource FarlaText}"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Margin="0,8,0,0" />
-                            <TextBlock x:Name="AnalysisDescriptionText"
-                                       Text="The first scan is read-only. Nothing is modified."
-                                       Foreground="{StaticResource FarlaMuted}"
-                                       FontSize="13"
-                                       Margin="0,6,0,16" />
-                            <Button x:Name="StartAnalysisButton"
-                                    Content="START SYSTEM ANALYSIS"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    HorizontalAlignment="Left"
-                                    Click="StartAnalysisButton_OnClick" />
+                            <TextBlock x:Name="RecommendationEyebrowText" Text="NEXT STEP" Foreground="{StaticResource FarlaMuted}" FontSize="11" FontWeight="SemiBold" />
+                            <TextBlock x:Name="RecommendationTitleText" Text="Let Farla understand your PC before changing anything." Foreground="{StaticResource FarlaText}" FontSize="16" FontWeight="SemiBold" Margin="0,8,0,0" />
+                            <TextBlock x:Name="AnalysisDescriptionText" Text="The first scan is read-only. Nothing is modified." Foreground="{StaticResource FarlaMuted}" FontSize="13" Margin="0,6,0,16" />
+                            <Button x:Name="StartAnalysisButton" Content="START SYSTEM ANALYSIS" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Left" Click="StartAnalysisButton_OnClick" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
