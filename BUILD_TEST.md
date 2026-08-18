@@ -1,0 +1,1 @@
+Temporary build verification marker. Remove after the first verified Windows artifact.
