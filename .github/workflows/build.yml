@@ -5,6 +5,7 @@ on:
     branches: [main, agent/**]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -25,19 +26,22 @@ jobs:
       - name: Build
         run: dotnet build FarlaTweaks.sln --configuration Release --no-restore
 
-      - name: Publish self-contained Windows build
+      - name: Publish single-file Windows build
         run: >-
           dotnet publish src/FarlaTweaks.App/FarlaTweaks.App.csproj
           --configuration Release
           --runtime win-x64
           --self-contained true
           --output artifacts/FarlaTweaks
-          -p:PublishSingleFile=false
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
           -p:PublishTrimmed=false
+          -p:DebugType=None
+          -p:DebugSymbols=false
 
       - name: Upload Windows test build
         uses: actions/upload-artifact@v4
         with:
           name: FarlaTweaks-Windows-x64
-          path: artifacts/FarlaTweaks/
+          path: artifacts/FarlaTweaks/FarlaTweaks.exe
           if-no-files-found: error
