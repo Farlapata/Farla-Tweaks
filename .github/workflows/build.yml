@@ -1,0 +1,36 @@
+name: Build Farla Tweaks
+
+on:
+  push:
+    branches: [main, agent/**]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x
+
+      - name: Restore
+        run: dotnet restore FarlaTweaks.sln
+
+      - name: Build
+        run: dotnet build FarlaTweaks.sln --configuration Release --no-restore
+
+      - name: Publish test build
+        run: dotnet publish src/FarlaTweaks.App/FarlaTweaks.App.csproj --configuration Release --output artifacts/FarlaTweaks --self-contained false
+
+      - name: Upload test build
+        uses: actions/upload-artifact@v4
+        with:
+          name: FarlaTweaks-test-build
+          path: artifacts/FarlaTweaks/
+          if-no-files-found: error
