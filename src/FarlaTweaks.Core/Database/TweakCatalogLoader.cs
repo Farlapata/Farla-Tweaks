@@ -18,7 +18,7 @@ public sealed class TweakCatalogLoader
             return Array.Empty<TweakDefinition>();
 
         await using var stream = File.OpenRead(path);
-        return await JsonSerializer.DeserializeAsync<List<TweakDefinition>>(stream, Options, cancellationToken)
-               ?? Array.Empty<TweakDefinition>();
+        var result = await JsonSerializer.DeserializeAsync<List<TweakDefinition>>(stream, Options, cancellationToken);
+        return result is { Count: > 0 } ? result : Array.Empty<TweakDefinition>();
     }
 }
