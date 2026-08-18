@@ -1,0 +1,75 @@
+<Window x:Class="FarlaTweaks.App.RecommendationReview"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Width="980"
+        Height="680"
+        WindowStartupLocation="CenterOwner">
+    <Border Background="{StaticResource FarlaBackground}"
+            BorderBrush="{StaticResource FarlaBorder}"
+            BorderThickness="1"
+            CornerRadius="16">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="72" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="70" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <StackPanel VerticalAlignment="Center" Margin="28,0,0,0">
+                    <TextBlock Text="OPTIMIZE" Foreground="{StaticResource FarlaText}" FontSize="22" FontWeight="SemiBold" />
+                    <TextBlock Text="Review what Farla thinks is worth changing." Foreground="{StaticResource FarlaMuted}" FontSize="13" Margin="0,4,0,0" />
+                </StackPanel>
+                <Button Content="×" Width="42" Height="32" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" Style="{StaticResource NavButtonStyle}" Click="CloseButton_OnClick" />
+            </Grid>
+
+            <Grid Grid.Row="1" Margin="28,0,28,12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+                    <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,10,0">
+                        <StackPanel>
+                            <TextBlock Text="RECOMMENDED" Foreground="{StaticResource FarlaMuted}" FontSize="10" FontWeight="SemiBold" />
+                            <TextBlock x:Name="RecommendedCountText" Text="--" Foreground="{StaticResource FarlaText}" FontSize="22" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,10,0">
+                        <StackPanel>
+                            <TextBlock Text="RESTARTS" Foreground="{StaticResource FarlaMuted}" FontSize="10" FontWeight="SemiBold" />
+                            <TextBlock x:Name="RestartCountText" Text="--" Foreground="{StaticResource FarlaText}" FontSize="22" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <TextBlock x:Name="ProfileStatusText" VerticalAlignment="Center" Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="8,0,0,0" />
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="RecommendationList" />
+                </ScrollViewer>
+            </Grid>
+
+            <Border Grid.Row="2" Background="#0D1015" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="0,1,0,0">
+                <Grid Margin="28,0">
+                    <TextBlock Text="Nothing is applied from this screen without an explicit action."
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource FarlaMuted}"
+                               FontSize="12" />
+                    <Button x:Name="ApplySelectedButton"
+                            Content="APPLY SELECTED"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            IsEnabled="False"
+                            Click="ApplySelectedButton_OnClick" />
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
