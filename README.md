@@ -1,34 +1,30 @@
 # Farla Tweaks
 
-Farla Tweaks is a Windows-first PC optimization platform focused on safe, explainable, reversible configuration changes.
+Farla Tweaks is a Windows-first performance and system companion built around explainable, reversible optimization.
 
-## Product direction
+## Current milestone
 
-Farla is not intended to be a collection of random registry files. The core product will understand a user's PC, detect dependencies and conflicts, recommend only relevant changes, back up state before modifications, verify results, and provide a clear rollback path.
+The repository now contains the core domain models, compatibility engine, registry snapshot/revert foundation, and the first WPF dashboard shell.
 
-Planned product areas:
+## Principles
 
-- Personalized setup wizard
-- Structured tweak database
-- Compatibility, dependency, and conflict engine
-- Reversible optimization engine
-- PC health and diagnostics
-- Game profiles, starting with Fortnite
-- Performance monitoring and session history
-- Adaptive Copilot, built on measured data rather than arbitrary automation
-- Clean dashboard and transparent activity history
+- Never blindly apply every tweak.
+- Every system change must be explainable and reversible.
+- Dependencies and conflicts are first-class data.
+- The user should see what Farla is doing.
+- The database should be readable by developers.
+- Suspicious or obfuscated source material stays quarantined.
 
-## Development principles
+## Development
 
-1. Every system modification must be documented.
-2. Every supported modification must have a rollback strategy.
-3. No obfuscated or unexplained code.
-4. No silent execution of downloaded executables.
-5. Compatibility rules take priority over raw tweak count.
-6. Performance claims must be measured and reproducible.
-7. Local-first functionality should work without an account.
-8. Security and user trust are product features, not afterthoughts.
+The first production milestones are:
 
-## Repository status
+1. System detection and profile creation.
+2. Structured tweak database loading.
+3. Safe apply, verification and rollback.
+4. Setup Wizard and compatibility rules.
+5. Diagnostics and health checks.
+6. Fortnite profile and session monitoring.
+7. Copilot and adaptive investigations.
 
-The repository is currently being rebuilt from an empty foundation. Early milestones will prioritize the core engine and data model before the full UI and commercial services.
+See `docs/ARCHITECTURE.md` and `docs/TWEAK_DATABASE.md` for the current design.

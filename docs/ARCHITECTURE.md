@@ -1,48 +1,30 @@
 # Farla Tweaks Architecture
 
-## Product layers
+## Layers
 
-```text
-Farla Tweaks App
-├── Presentation
-│   ├── Dashboard
-│   ├── Setup Wizard
-│   ├── Diagnostics
-│   └── Activity / Rollback
-├── Application Services
-│   ├── Recommendation Engine
-│   ├── Compatibility Engine
-│   ├── Optimization Engine
-│   └── System Profile
-├── Core
-│   ├── Tweak Definitions
-│   ├── Backups
-│   ├── Results
-│   └── Safety Policies
-└── Windows Integration
-    ├── Registry
-    ├── Services / Processes
-    ├── System Information
-    └── Performance Counters
-```
+- **App**: WPF presentation layer.
+- **Core**: product logic, models, compatibility, state and execution contracts.
+- **Database**: structured tweak definitions and provenance.
+- **Diagnostics**: Windows health and hardware/system discovery.
+- **Games**: game-specific profiles and session integration.
+- **Copilot**: monitoring and evidence-based intervention logic.
 
-## Non-negotiable behavior
+## Safety boundary
 
-The optimization engine must not blindly execute a list of commands. It must resolve a proposed plan first, validate dependencies/conflicts, create a backup, apply changes transactionally where possible, verify the result, and record an auditable activity entry.
+The Core execution layer must never execute arbitrary downloads or opaque payloads. Each supported operation type should have an explicit executor and rollback strategy.
 
-Rollback is a first-class operation, not an afterthought.
+## Tweak lifecycle
 
-## Development order
+1. Load definition.
+2. Validate schema.
+3. Check OS/hardware/software dependencies.
+4. Check conflicts.
+5. Snapshot affected state.
+6. Apply through a known executor.
+7. Verify the resulting state.
+8. Record the session.
+9. Revert using the stored snapshot when requested.
 
-1. Data model and safety primitives
-2. System detection
-3. Tweak loading and validation
-4. Backup / rollback
-5. Recommendation engine
-6. Setup wizard
-7. Dashboard
-8. Diagnostics
-9. Game integrations
-10. Monitoring
-11. Adaptive Copilot
-12. Accounts and licensing
+## Runtime vs persistent changes
+
+Persistent changes such as registry settings belong in the setup/optimization pipeline. Live Copilot behavior should use explicit runtime controls and only intervene when a measurable problem is detected.
