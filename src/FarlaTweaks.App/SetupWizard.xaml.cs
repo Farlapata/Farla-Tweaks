@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using FarlaTweaks.Core.Compatibility;
+using FarlaTweaks.Core.Database;
 using FarlaTweaks.Core.Models;
 using FarlaTweaks.Core.System;
 
@@ -28,7 +29,7 @@ public partial class SetupWizard : Window
         if (_step == 2)
         {
             _step = 3;
-            BuildPlan();
+            _ = BuildPlanAsync();
             ShowStep();
             return;
         }
@@ -64,67 +65,71 @@ public partial class SetupWizard : Window
         };
     }
 
-    private void BuildPlan()
+    private async Task BuildPlanAsync()
     {
+        PlanSummary.Text = "Analyzing your setup...";
+        PlanItems.Items.Clear();
+
         try
         {
-            var profile = new WindowsSystemProfileScanner().Scan();
-            var tweaks = new[]
+            var scanner = new WindowsSystemProfileScanner();
+            var detectedProfile = await Task.Run(scanner.Scan);
+
+            var capabilities = new List<string>();
+            if (CrosshairBox.IsChecked == true)
+                capabilities.Add("crosshair-x");
+            else
+                capabilities.Add("game-bar-unused");
+
+            if (ObsBox.IsChecked == true)
+                capabilities.Add("obs");
+            if (DiscordBox.IsChecked == true)
+                capabilities.Add("discord-overlay");
+
+            var profile = detectedProfile with
             {
-                new TweakDefinition
-                {
-                    Id = "gaming.disable-game-dvr",
-                    Name = "Disable unused Game DVR capture",
-                    Category = "Gaming",
-                    Description = "Stops background Game DVR capture when it is not needed.",
-                    Purpose = "Reduce unnecessary background capture activity.",
-                    Risk = RiskLevel.Safe,
-                    Dependencies = CrosshairBox.IsChecked == true ? new[] { "game-bar-unused" } : Array.Empty<string>()
-                },
-                new TweakDefinition
-                {
-                    Id = "gaming.optimize-background-capture",
-                    Name = "Reduce background capture activity",
-                    Category = "Gaming",
-                    Description = "Targets background capture overhead without disabling Game Bar dependencies.",
-                    Purpose = "Reduce background activity while preserving overlay tools.",
-                    Risk = RiskLevel.Moderate
-                },
-                new TweakDefinition
-                {
-                    Id = "system.safe-startup-review",
-                    Name = "Review unnecessary startup applications",
-                    Category = "Windows",
-                    Description = "Identifies startup programs for review instead of blindly disabling them.",
-                    Purpose = "Reduce unnecessary startup work.",
-                    Risk = RiskLevel.Safe
-                }
+                Capabilities = capabilities
             };
 
+            var catalog = await new TweakCatalogLoader().LoadAsync();
             var engine = new CompatibilityEngine();
-            var selectedIds = tweaks.Select(t => t.Id).ToArray();
-            var compatible = tweaks
+            var selectedIds = catalog.Select(t => t.Id).ToArray();
+
+            var compatible = catalog
                 .Select(t => (Tweak: t, Result: engine.Evaluate(t, profile, selectedIds)))
-                .Where(x => x.Result.IsCompatible)
+                .Where(x => x.Result.IsCompatible && x.Tweak.Risk != RiskLevel.Rejected)
                 .Select(x => x.Tweak)
                 .ToList();
 
-            PlanSummary.Text = $"{compatible.Count} recommendations for {GameBox.Text}.";
-            PlanItems.Items.Clear();
-            foreach (var tweak in compatible)
+            var game = GameBox.Text;
+            var gaming = compatible.Where(t => t.Tags.Contains("gaming", StringComparer.OrdinalIgnoreCase)).ToList();
+
+            PlanSummary.Text = $"{compatible.Count} compatible recommendations for {game}.";
+            foreach (var tweak in compatible.Take(6))
+            {
+                var risk = tweak.Risk == RiskLevel.Safe ? "Safe" : "Review";
+                PlanItems.Items.Add(new TextBlock
+                {
+                    Text = $"• {tweak.Name}  ·  {risk}",
+                    Foreground = (System.Windows.Media.Brush)FindResource("FarlaText"),
+                    Margin = new Thickness(0, 4, 0, 0)
+                });
+            }
+
+            if (CrosshairBox.IsChecked == true)
             {
                 PlanItems.Items.Add(new TextBlock
                 {
-                    Text = $"• {tweak.Name}",
-                    Foreground = (System.Windows.Media.Brush)FindResource("FarlaText"),
-                    Margin = new Thickness(0, 4, 0, 0)
+                    Text = "• Game Bar stays available because Crosshair X was selected.",
+                    Foreground = (System.Windows.Media.Brush)FindResource("FarlaMuted"),
+                    Margin = new Thickness(0, 10, 0, 0),
+                    TextWrapping = TextWrapping.Wrap
                 });
             }
         }
         catch
         {
-            PlanSummary.Text = "We couldn't read the system yet. The plan can be generated after setup.";
-            PlanItems.Items.Clear();
+            PlanSummary.Text = "We couldn't complete the system scan yet. Nothing has been changed.";
         }
     }
 
