@@ -11,5 +11,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FarlaTweaks.Core\FarlaTweaks.Core.csproj" />
+    <None Include="..\..\database\starter\tweaks.json" Link="database\starter\tweaks.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
