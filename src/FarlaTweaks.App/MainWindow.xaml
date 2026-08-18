@@ -13,14 +13,18 @@
         MaxWidth="1180"
         MaxHeight="760"
         WindowStartupLocation="CenterScreen">
-    <Border Background="{StaticResource FarlaBackground}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="16">
+    <Border Background="{StaticResource FarlaBackground}"
+            BorderBrush="{StaticResource FarlaBorder}"
+            BorderThickness="1"
+            CornerRadius="16">
         <Grid MouseLeftButtonDown="WindowDragArea_OnMouseLeftButtonDown">
             <Grid.RowDefinitions>
-                <RowDefinition Height="74" />
+                <RowDefinition Height="72" />
+                <RowDefinition Height="52" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
+            <Grid Grid.Row="0" Background="{StaticResource FarlaBackground}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="220" />
                     <ColumnDefinition Width="*" />
@@ -28,22 +32,78 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
-                    <TextBlock Text="FARLA" Foreground="{StaticResource FarlaText}" FontSize="22" FontWeight="SemiBold" />
-                    <TextBlock Text=" / TWEAKS" Foreground="{StaticResource FarlaMuted}" FontSize="13" VerticalAlignment="Bottom" Margin="6,0,0,4" />
+                    <TextBlock Text="FARLA"
+                               Foreground="{StaticResource FarlaText}"
+                               FontSize="22"
+                               FontWeight="SemiBold" />
+                    <TextBlock Text=" / TWEAKS"
+                               Foreground="{StaticResource FarlaMuted}"
+                               FontSize="13"
+                               VerticalAlignment="Bottom"
+                               Margin="6,0,0,4" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0">
-                    <Button Content="−" Width="42" Height="32" Style="{StaticResource NavButtonStyle}" ToolTip="Minimize" Click="MinimizeButton_OnClick" />
-                    <Button Content="×" Width="42" Height="32" Style="{StaticResource NavButtonStyle}" ToolTip="Close" Click="CloseButton_OnClick" />
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="0,0,12,0">
+                    <Button Content="−"
+                            Width="42"
+                            Height="32"
+                            Style="{StaticResource NavButtonStyle}"
+                            ToolTip="Minimize"
+                            Click="MinimizeButton_OnClick" />
+                    <Button Content="×"
+                            Width="42"
+                            Height="32"
+                            Style="{StaticResource NavButtonStyle}"
+                            ToolTip="Close"
+                            Click="CloseButton_OnClick" />
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="1">
-                <TextBlock Text="Farla Tweaks"
+            <Border Grid.Row="1"
+                    Background="#0D1015"
+                    BorderBrush="{StaticResource FarlaBorder}"
+                    BorderThickness="0,1,0,1">
+                <Grid Margin="18,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="Overview" Style="{StaticResource NavButtonStyle}" />
+                    <Button Grid.Column="1" Content="Optimize" Style="{StaticResource NavButtonStyle}" />
+                    <Button Grid.Column="2" Content="Games" Style="{StaticResource NavButtonStyle}" />
+                    <Button Grid.Column="3" Content="Monitor" Style="{StaticResource NavButtonStyle}" />
+                    <Button Grid.Column="4" Content="History" Style="{StaticResource NavButtonStyle}" />
+                    <Button Grid.Column="5" Content="Settings" Style="{StaticResource NavButtonStyle}" />
+
+                    <StackPanel Grid.Column="6"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Margin="0,0,6,0">
+                        <Ellipse Width="7" Height="7" Fill="{StaticResource FarlaSuccess}" Margin="0,0,7,0" />
+                        <TextBlock Text="PROTECTED"
+                                   Foreground="{StaticResource FarlaMuted}"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2">
+                <TextBlock Text=""
                            HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           Foreground="{StaticResource FarlaMuted}"
-                           FontSize="16" />
+                           VerticalAlignment="Center" />
             </Grid>
         </Grid>
     </Border>
