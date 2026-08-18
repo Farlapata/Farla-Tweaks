@@ -14,17 +14,17 @@
         MaxHeight="760"
         WindowStartupLocation="CenterScreen">
     <Border Background="{StaticResource FarlaBackground}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="16">
-        <Grid>
+        <Grid MouseLeftButtonDown="WindowDragArea_OnMouseLeftButtonDown">
             <Grid.RowDefinitions>
                 <RowDefinition Height="74" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" MouseLeftButtonDown="WindowDragArea_OnMouseLeftButtonDown">
+            <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="190" />
+                    <ColumnDefinition Width="220" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="150" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
@@ -32,118 +32,19 @@
                     <TextBlock Text=" / TWEAKS" Foreground="{StaticResource FarlaMuted}" FontSize="13" VerticalAlignment="Bottom" Margin="6,0,0,4" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12,0">
-                    <Button Content="Overview" Style="{StaticResource NavButtonStyle}" />
-                    <Button Content="Optimize" Style="{StaticResource NavButtonStyle}" Click="StartWizardButton_OnClick" />
-                    <Button Content="Games" Style="{StaticResource NavButtonStyle}" />
-                    <Button Content="Monitor" Style="{StaticResource NavButtonStyle}" />
-                    <Button Content="History" Style="{StaticResource NavButtonStyle}" />
-                    <Button Content="Settings" Style="{StaticResource NavButtonStyle}" />
-                </StackPanel>
-
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
-                        <Ellipse Width="7" Height="7" Fill="{StaticResource FarlaSuccess}" VerticalAlignment="Center" />
-                        <TextBlock Text="PROTECTED" Foreground="{StaticResource FarlaSuccess}" FontSize="11" FontWeight="SemiBold" Margin="7,0,0,0" />
-                    </StackPanel>
                     <Button Content="−" Width="42" Height="32" Style="{StaticResource NavButtonStyle}" ToolTip="Minimize" Click="MinimizeButton_OnClick" />
                     <Button Content="×" Width="42" Height="32" Style="{StaticResource NavButtonStyle}" ToolTip="Close" Click="CloseButton_OnClick" />
                 </StackPanel>
             </Grid>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
-                <Grid Margin="42,20,42,36">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Grid.Row="0" Margin="0,0,0,28">
-                        <TextBlock x:Name="GreetingText" Text="GOOD AFTERNOON, MATHÉO" Foreground="{StaticResource FarlaText}" FontSize="25" FontWeight="SemiBold" />
-                        <TextBlock Text="Your PC is ready." Foreground="{StaticResource FarlaMuted}" FontSize="15" Margin="0,7,0,0" />
-                        <TextBlock x:Name="SystemSummaryText" Text="Reading your system profile..." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,8,0,0" />
-                    </StackPanel>
-
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1.05*" />
-                            <ColumnDefinition Width="0.95*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0" Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14" Padding="28" Margin="0,0,10,0">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="180" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="FARLA SCORE" Foreground="{StaticResource FarlaMuted}" FontSize="12" FontWeight="SemiBold" />
-                                    <TextBlock Text="91" Foreground="{StaticResource FarlaText}" FontSize="68" FontWeight="SemiBold" Margin="0,4,0,0" />
-                                    <TextBlock Text="OPTIMIZED" Foreground="{StaticResource FarlaAccent}" FontSize="12" FontWeight="SemiBold" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
-                                    <TextBlock Text="Performance" Foreground="{StaticResource FarlaText}" FontSize="13" />
-                                    <ProgressBar Height="4" Value="94" Maximum="100" Margin="0,6,0,12" Background="#20262F" Foreground="{StaticResource FarlaAccent}" />
-                                    <TextBlock Text="Stability" Foreground="{StaticResource FarlaText}" FontSize="13" />
-                                    <ProgressBar Height="4" Value="96" Maximum="100" Margin="0,6,0,12" Background="#20262F" Foreground="{StaticResource FarlaAccent}" />
-                                    <TextBlock Text="Gaming" Foreground="{StaticResource FarlaText}" FontSize="13" />
-                                    <ProgressBar Height="4" Value="91" Maximum="100" Margin="0,6,0,12" Background="#20262F" Foreground="{StaticResource FarlaAccent}" />
-                                    <TextBlock Text="Network" Foreground="{StaticResource FarlaText}" FontSize="13" />
-                                    <ProgressBar Height="4" Value="78" Maximum="100" Margin="0,6,0,0" Background="#20262F" Foreground="{StaticResource FarlaAccentSoft}" />
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-
-                        <Border Grid.Column="1" Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14" Padding="28" Margin="10,0,0,0">
-                            <StackPanel>
-                                <TextBlock Text="FORTNITE" Foreground="{StaticResource FarlaMuted}" FontSize="12" FontWeight="SemiBold" />
-                                <StackPanel Orientation="Horizontal" Margin="0,7,0,0">
-                                    <TextBlock Text="287" Foreground="{StaticResource FarlaText}" FontSize="48" FontWeight="SemiBold" />
-                                    <TextBlock Text=" FPS" Foreground="{StaticResource FarlaMuted}" FontSize="17" VerticalAlignment="Bottom" Margin="4,0,0,9" />
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="181" Foreground="{StaticResource FarlaText}" FontSize="20" FontWeight="Medium" />
-                                    <TextBlock Text=" 1% LOW" Foreground="{StaticResource FarlaMuted}" FontSize="12" VerticalAlignment="Center" Margin="4,0,0,0" />
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,18,0,16">
-                                    <Ellipse Width="7" Height="7" Fill="{StaticResource FarlaSuccess}" VerticalAlignment="Center" />
-                                    <TextBlock Text="Ready" Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="7,0,0,0" />
-                                </StackPanel>
-                                <Button Content="Launch Copilot" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Stretch" />
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-
-                    <Border Grid.Row="2" Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14" Padding="28" Margin="0,20,0,0">
-                        <StackPanel>
-                            <TextBlock Text="FARLA COPILOT" Foreground="{StaticResource FarlaMuted}" FontSize="12" FontWeight="SemiBold" />
-                            <StackPanel Orientation="Horizontal" Margin="0,11,0,0">
-                                <Ellipse Width="8" Height="8" Fill="{StaticResource FarlaSuccess}" VerticalAlignment="Center" />
-                                <TextBlock Text="Monitoring" Foreground="{StaticResource FarlaText}" FontSize="14" Margin="8,0,0,0" />
-                            </StackPanel>
-                            <TextBlock Text="Your system is performing normally." Foreground="{StaticResource FarlaText}" FontSize="18" Margin="0,17,0,0" />
-                            <TextBlock Text="No changes needed." Foreground="{StaticResource FarlaMuted}" FontSize="14" Margin="0,6,0,0" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Row="3" Background="{StaticResource FarlaSurfaceAlt}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14" Padding="24" Margin="0,14,0,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel>
-                                <TextBlock Text="RECOMMENDATION" Foreground="{StaticResource FarlaMuted}" FontSize="11" FontWeight="SemiBold" />
-                                <TextBlock Text="NVIDIA driver updated recently." Foreground="{StaticResource FarlaText}" FontSize="14" Margin="0,10,0,0" />
-                                <TextBlock Text="Farla will re-evaluate affected optimizations before applying anything." Foreground="{StaticResource FarlaMuted}" FontSize="13" Margin="0,4,0,0" TextWrapping="Wrap" />
-                            </StackPanel>
-                            <Button Grid.Column="1" Content="Review" Style="{StaticResource PrimaryButtonStyle}" VerticalAlignment="Center" Margin="20,0,0,0" />
-                        </Grid>
-                    </Border>
-                </Grid>
-            </ScrollViewer>
+            <Grid Grid.Row="1">
+                <TextBlock Text="Farla Tweaks"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource FarlaMuted}"
+                           FontSize="16" />
+            </Grid>
         </Grid>
     </Border>
 </Window>
