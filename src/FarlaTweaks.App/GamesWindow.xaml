@@ -7,56 +7,54 @@
         AllowsTransparency="True"
         Background="Transparent"
         Width="900"
-        Height="620"
+        Height="700"
         WindowStartupLocation="CenterOwner">
     <Border Background="{StaticResource FarlaBackground}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14">
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="70" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="68" />
-            </Grid.RowDefinitions>
+            <Grid.RowDefinitions><RowDefinition Height="70" /><RowDefinition Height="*" /><RowDefinition Height="68" /></Grid.RowDefinitions>
             <Grid Grid.Row="0" MouseLeftButtonDown="DragArea_OnMouseLeftButtonDown">
                 <StackPanel VerticalAlignment="Center" Margin="26,0,0,0">
                     <TextBlock Text="GAMES" Foreground="{StaticResource FarlaText}" FontSize="20" FontWeight="SemiBold" />
-                    <TextBlock Text="Game profiles and launch detection." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,3,0,0" />
+                    <TextBlock Text="Game profiles, launch detection, and session history." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,3,0,0" />
                 </StackPanel>
                 <Button Content="×" Width="42" Height="32" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" Style="{StaticResource NavButtonStyle}" Click="CloseButton_OnClick" />
             </Grid>
-            <StackPanel Grid.Row="1" Margin="26,10,26,20">
-                <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="20">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                <StackPanel Margin="26,10,26,20">
+                    <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="20">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="PRIMARY GAME" Foreground="{StaticResource FarlaMuted}" FontSize="10" FontWeight="SemiBold" />
+                                <TextBlock x:Name="PrimaryGameText" Text="FORTNITE" Foreground="{StaticResource FarlaText}" FontSize="25" FontWeight="SemiBold" Margin="0,7,0,0" />
+                                <TextBlock x:Name="GameStatusText" Text="NOT RUNNING" Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,5,0,0" />
+                            </StackPanel>
+                            <Ellipse x:Name="StatusDot" Grid.Column="1" Width="9" Height="9" Fill="{StaticResource FarlaMuted}" VerticalAlignment="Top" Margin="30,6,0,0" />
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="PROFILE" Foreground="{StaticResource FarlaMuted}" FontSize="10" FontWeight="SemiBold" Margin="0,24,0,0" />
+                    <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="18" Margin="0,10,0,0">
                         <StackPanel>
-                            <TextBlock Text="PRIMARY GAME" Foreground="{StaticResource FarlaMuted}" FontSize="10" FontWeight="SemiBold" />
-                            <TextBlock x:Name="PrimaryGameText" Text="FORTNITE" Foreground="{StaticResource FarlaText}" FontSize="25" FontWeight="SemiBold" Margin="0,7,0,0" />
-                            <TextBlock x:Name="GameStatusText" Text="NOT RUNNING" Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,5,0,0" />
+                            <TextBlock Text="Farla watches for the game process and attaches telemetry when it starts." Foreground="{StaticResource FarlaText}" FontSize="13" TextWrapping="Wrap" />
+                            <TextBlock x:Name="DependencyText" Text="Dependency profile: loading..." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" />
                         </StackPanel>
-                        <Ellipse x:Name="StatusDot" Grid.Column="1" Width="9" Height="9" Fill="{StaticResource FarlaMuted}" VerticalAlignment="Top" Margin="30,6,0,0" />
-                    </Grid>
-                </Border>
+                    </Border>
 
-                <TextBlock Text="PROFILE" Foreground="{StaticResource FarlaMuted}" FontSize="10" FontWeight="SemiBold" Margin="0,24,0,0" />
-                <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="18" Margin="0,10,0,0">
-                    <StackPanel>
-                        <TextBlock Text="Farla will watch for the game process and attach session telemetry when it starts." Foreground="{StaticResource FarlaText}" FontSize="13" TextWrapping="Wrap" />
-                        <TextBlock x:Name="DependencyText" Text="Dependency profile: loading..." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
+                    <TextBlock Text="RECENT SESSIONS" Foreground="{StaticResource FarlaMuted}" FontSize="10" FontWeight="SemiBold" Margin="0,24,0,0" />
+                    <StackPanel x:Name="SessionList" Margin="0,10,0,0" />
 
-                <Border Background="{StaticResource FarlaSurfaceAlt}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="18" Margin="0,20,0,0">
-                    <StackPanel>
-                        <TextBlock Text="WHAT COMES NEXT" Foreground="{StaticResource FarlaMuted}" FontSize="10" FontWeight="SemiBold" />
-                        <TextBlock Text="Benchmark baseline · frametime capture · session history · optimization events" Foreground="{StaticResource FarlaText}" FontSize="13" Margin="0,7,0,0" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
+                    <Border Background="{StaticResource FarlaSurfaceAlt}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="18" Margin="0,20,0,0">
+                        <StackPanel>
+                            <TextBlock Text="WHAT COMES NEXT" Foreground="{StaticResource FarlaMuted}" FontSize="10" FontWeight="SemiBold" />
+                            <TextBlock Text="Benchmark baseline · frametime capture · optimization events · Copilot session review" Foreground="{StaticResource FarlaText}" FontSize="13" Margin="0,7,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
             <Border Grid.Row="2" Background="#0B0E12" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="0,1,0,0">
                 <Grid Margin="26,0">
-                    <TextBlock Text="Launch the game and Farla will detect it automatically."
-                               Foreground="{StaticResource FarlaMuted}"
-                               FontSize="11"
-                               VerticalAlignment="Center" />
+                    <TextBlock Text="Launch the game and Farla will detect it automatically." Foreground="{StaticResource FarlaMuted}" FontSize="11" VerticalAlignment="Center" />
                     <Button Content="REFRESH" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="RefreshButton_OnClick" />
                 </Grid>
             </Border>
