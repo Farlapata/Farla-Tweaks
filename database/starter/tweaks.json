@@ -11,7 +11,22 @@
     "Tags": ["gaming", "background", "capture"],
     "Dependencies": ["game-bar-unused"],
     "Conflicts": ["crosshair-x", "game-bar-required"],
-    "RegistryChanges": []
+    "RegistryChanges": [
+      {
+        "Root": "HKCU",
+        "KeyPath": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\GameDVR",
+        "ValueName": "AppCaptureEnabled",
+        "ValueType": "DWORD",
+        "ValueData": "0"
+      },
+      {
+        "Root": "HKCU",
+        "KeyPath": "System\\GameConfigStore",
+        "ValueName": "GameDVR_Enabled",
+        "ValueType": "DWORD",
+        "ValueData": "0"
+      }
+    ]
   },
   {
     "Id": "gaming.preserve-game-bar-dependencies",
