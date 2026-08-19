@@ -5,11 +5,13 @@ using FarlaTweaks.Core.Compatibility;
 using FarlaTweaks.Core.Database;
 using FarlaTweaks.Core.Diagnostics;
 using FarlaTweaks.Core.Models;
+using FarlaTweaks.Core.Persistence;
 
 namespace FarlaTweaks.App;
 
 public partial class SetupWizard : Window
 {
+    private readonly UserPreferencesStore _preferencesStore = new();
     private int _step = 1;
 
     public SetupWizard()
@@ -89,6 +91,25 @@ public partial class SetupWizard : Window
             if (WallpaperEngineBox.IsChecked == true)
                 userCapabilities.Add("wallpaper-engine");
 
+            var goals = new List<string>();
+            if (CompetitiveGamingBox.IsChecked == true)
+                goals.Add("competitive-gaming");
+            if (StreamingBox.IsChecked == true)
+                goals.Add("streaming");
+            if (CreationBox.IsChecked == true)
+                goals.Add("creation");
+
+            var selectedGame = (GameBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Fortnite";
+            var preferences = new UserPreferences
+            {
+                OnboardingCompleted = true,
+                PrimaryGame = selectedGame,
+                Goals = goals,
+                Dependencies = userCapabilities,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+            await _preferencesStore.SaveAsync(preferences);
+
             var profile = detectedProfile with
             {
                 Capabilities = detectedProfile.Capabilities
@@ -107,7 +128,7 @@ public partial class SetupWizard : Window
                 .Select(x => x.Tweak)
                 .ToList();
 
-            PlanSummary.Text = $"{compatible.Count} compatible recommendations for {GameBox.Text}.";
+            PlanSummary.Text = $"{compatible.Count} compatible recommendations for {selectedGame}.";
             foreach (var tweak in compatible.Take(6))
             {
                 var risk = tweak.Risk == RiskLevel.Safe ? "Safe" : "Review";
@@ -132,7 +153,7 @@ public partial class SetupWizard : Window
         }
         catch
         {
-            PlanSummary.Text = "We couldn't complete the system scan yet. Nothing has been changed.";
+            PlanSummary.Text = "We couldn't complete the setup analysis yet. Nothing has been changed.";
         }
     }
 
