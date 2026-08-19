@@ -17,6 +17,12 @@ public partial class SettingsWindow : Window
             DialogResult = true;
     }
 
+    private void OpenDiagnosticsButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var diagnostics = new DiagnosticsWindow { Owner = this };
+        diagnostics.ShowDialog();
+    }
+
     private void DragArea_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ButtonState == MouseButtonState.Pressed)
