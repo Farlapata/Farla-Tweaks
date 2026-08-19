@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -73,6 +74,51 @@ public partial class GamesWindow : Window
         }
 
         _wasRunning = running;
+        await RefreshSessionListAsync(primaryGame);
+    }
+
+    private async Task RefreshSessionListAsync(string primaryGame)
+    {
+        SessionList.Children.Clear();
+        var sessions = await _sessionStore.LoadAsync();
+        var recent = sessions
+            .Where(x => x.Game.Equals(primaryGame, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(x => x.StartedAt)
+            .Take(5)
+            .ToArray();
+
+        if (recent.Length == 0)
+        {
+            SessionList.Children.Add(new TextBlock
+            {
+                Text = "No completed sessions yet.",
+                Foreground = (Brush)FindResource("FarlaMuted"),
+                FontSize = 12
+            });
+            return;
+        }
+
+        foreach (var session in recent)
+        {
+            var grid = new Grid { Margin = new Thickness(0, 0, 0, 8) };
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            grid.Children.Add(new TextBlock
+            {
+                Text = session.StartedAt.LocalDateTime.ToString("dd MMM  HH:mm"),
+                Foreground = (Brush)FindResource("FarlaText"),
+                FontSize = 12
+            });
+            var duration = new TextBlock
+            {
+                Text = FormatDuration(session.Duration),
+                Foreground = (Brush)FindResource("FarlaMuted"),
+                FontSize = 12
+            };
+            Grid.SetColumn(duration, 1);
+            grid.Children.Add(duration);
+            SessionList.Children.Add(grid);
+        }
     }
 
     private static string FormatDuration(TimeSpan duration)
