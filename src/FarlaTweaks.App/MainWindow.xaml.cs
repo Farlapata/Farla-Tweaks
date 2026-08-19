@@ -209,7 +209,20 @@ public partial class MainWindow : Window
     private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
     {
         var settings = new SettingsWindow { Owner = this };
-        settings.ShowDialog();
+        if (settings.ShowDialog() == true)
+            _ = ReloadAfterSetupAsync();
+    }
+
+    private void GamesButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var games = new GamesWindow { Owner = this };
+        games.ShowDialog();
+    }
+
+    private void MonitorButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var monitor = new MonitorWindow { Owner = this };
+        monitor.ShowDialog();
     }
 
     private async Task ReloadAfterSetupAsync()
