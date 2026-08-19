@@ -7,6 +7,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: windows-latest
@@ -39,9 +42,31 @@ jobs:
           -p:DebugType=None
           -p:DebugSymbols=false
 
-      - name: Upload Windows test build
+      - name: Create executable checksum
+        shell: pwsh
+        run: |
+          (Get-FileHash artifacts/FarlaTweaks/FarlaTweaks.exe -Algorithm SHA256).Hash | Set-Content artifacts/FarlaTweaks/FarlaTweaks.exe.sha256
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: '& "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe" "installer\FarlaTweaks.iss"'
+
+      - name: Upload standalone Windows build
         uses: actions/upload-artifact@v4
         with:
           name: FarlaTweaks-Windows-x64
-          path: artifacts/FarlaTweaks/FarlaTweaks.exe
+          path: |
+            artifacts/FarlaTweaks/FarlaTweaks.exe
+            artifacts/FarlaTweaks/FarlaTweaks.exe.sha256
+          if-no-files-found: error
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: FarlaTweaks-Windows-x64-Installer
+          path: artifacts/installer/*.exe
           if-no-files-found: error
