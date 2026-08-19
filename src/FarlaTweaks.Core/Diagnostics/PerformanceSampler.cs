@@ -97,7 +97,7 @@ public sealed class PerformanceSampler : IDisposable
     }
 
     private static ulong FileTimeToUInt64(System.Runtime.InteropServices.ComTypes.FILETIME value)
-        => ((ulong)value.dwHighDateTime << 32) | value.dwLowDateTime;
+        => ((ulong)value.dwHighDateTime << 32) | (ulong)(uint)value.dwLowDateTime;
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool GetSystemTimes(
