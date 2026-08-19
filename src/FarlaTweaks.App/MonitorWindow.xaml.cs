@@ -4,12 +4,14 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using FarlaTweaks.Core.Diagnostics;
+using FarlaTweaks.Core.Monitoring;
 
 namespace FarlaTweaks.App;
 
 public partial class MonitorWindow : Window
 {
     private readonly PerformanceSampler _sampler = new();
+    private readonly CopilotEngine _copilot = new();
     private readonly DispatcherTimer _timer;
     private readonly Queue<double> _cpuHistory = new();
     private readonly Queue<double> _memoryHistory = new();
@@ -29,25 +31,24 @@ public partial class MonitorWindow : Window
         _ = SampleAsync();
     }
 
-    private async void Timer_OnTick(object? sender, EventArgs e)
-    {
-        await SampleAsync();
-    }
+    private async void Timer_OnTick(object? sender, EventArgs e) => await SampleAsync();
 
     private async Task SampleAsync()
     {
         try
         {
             var sample = await Task.Run(_sampler.Sample);
+            var observation = _copilot.Observe(sample);
             Add(_cpuHistory, sample.CpuPercent);
             Add(_memoryHistory, sample.MemoryPercent);
 
             CpuText.Text = $"{sample.CpuPercent:0}%";
             MemoryText.Text = $"{sample.MemoryPercent:0}%";
             GpuText.Text = sample.GpuPercent.HasValue ? $"{sample.GpuPercent:0}%" : "N/A";
-            StatusText.Text = sample.GpuPercent.HasValue
-                ? "System telemetry is live."
-                : "System telemetry is live. NVIDIA GPU telemetry is unavailable.";
+            StatusText.Text = $"{observation.Title}  ·  {observation.Detail}";
+            StatusText.Foreground = observation.State == "attention"
+                ? (Brush)FindResource("FarlaWarning")
+                : (Brush)FindResource("FarlaMuted");
             DrawGraph();
         }
         catch (Exception ex)
@@ -68,12 +69,11 @@ public partial class MonitorWindow : Window
         GraphCanvas.Children.Clear();
         var width = Math.Max(20, GraphCanvas.ActualWidth);
         var height = Math.Max(20, GraphCanvas.ActualHeight);
-
-        DrawLine(_cpuHistory, width, height, "CPU", 0);
-        DrawLine(_memoryHistory, width, height, "MEMORY", 1);
+        DrawLine(_cpuHistory, width, height, 0);
+        DrawLine(_memoryHistory, width, height, 1);
     }
 
-    private void DrawLine(Queue<double> values, double width, double height, string label, int layer)
+    private void DrawLine(Queue<double> values, double width, double height, int layer)
     {
         if (values.Count < 2)
             return;
@@ -83,14 +83,16 @@ public partial class MonitorWindow : Window
         for (var i = 0; i < snapshot.Length; i++)
         {
             var x = i * (width / Math.Max(1, snapshot.Length - 1));
-            var y = height - (snapshot[i] / 100d * height);
+            var y = height - snapshot[i] / 100d * height;
             points.Add(new Point(x, y));
         }
 
         var line = new Polyline
         {
             Points = points,
-            Stroke = layer == 0 ? new SolidColorBrush(Color.FromRgb(196, 204, 196)) : new SolidColorBrush(Color.FromRgb(120, 132, 122)),
+            Stroke = layer == 0
+                ? new SolidColorBrush(Color.FromRgb(196, 204, 196))
+                : new SolidColorBrush(Color.FromRgb(120, 132, 122)),
             StrokeThickness = layer == 0 ? 2 : 1.5,
             Opacity = layer == 0 ? 0.95 : 0.8
         };
