@@ -3,9 +3,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using FarlaTweaks.Core.Database;
 using FarlaTweaks.Core.Diagnostics;
 using FarlaTweaks.Core.Models;
+using FarlaTweaks.Core.Monitoring;
 using FarlaTweaks.Core.Persistence;
 using FarlaTweaks.Core.Recommendations;
 
@@ -18,15 +20,22 @@ public partial class MainWindow : Window
     private readonly UserPreferencesStore _preferencesStore = new();
     private readonly TweakCatalogLoader _catalogLoader = new();
     private readonly RecommendationEngine _recommendationEngine = new();
+    private readonly PerformanceSampler _copilotSampler = new();
+    private readonly CopilotEngine _copilotEngine = new();
+    private readonly DispatcherTimer _copilotTimer;
     private SystemProfile? _profile;
     private UserPreferences? _preferences;
     private bool _analysisRunning;
+    private int _recommendationCount;
 
     public MainWindow()
     {
         InitializeComponent();
         UpdateGreeting();
+        _copilotTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _copilotTimer.Tick += CopilotTimer_OnTick;
         Loaded += MainWindow_OnLoaded;
+        Closed += MainWindow_OnClosed;
     }
 
     private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
@@ -52,6 +61,8 @@ public partial class MainWindow : Window
                 await ApplyProfileToDashboardAsync(_profile, persisted: true);
             else
                 await AnalyzeAsync();
+
+            _copilotTimer.Start();
         }
         catch
         {
@@ -126,6 +137,7 @@ public partial class MainWindow : Window
         var effectiveProfile = profile with { Capabilities = effectiveCapabilities };
         var tweaks = await _catalogLoader.LoadAsync();
         var recommendations = _recommendationEngine.Build(effectiveProfile, tweaks, effectiveCapabilities);
+        _recommendationCount = recommendations.Count;
 
         var score = CalculateScore(profile);
         ScoreText.Text = score.ToString();
@@ -156,12 +168,42 @@ public partial class MainWindow : Window
 
         RecommendationTitleText.Text = recommendations.Count == 0
             ? "No compatible changes are waiting for review."
-            : $"{recommendations.Count} compatible changes are waiting for review.";
-        AnalysisDescriptionText.Text = $"Detected {Compact(profile.Cpu)}, {Compact(profile.Gpu)}, {profile.RamGb} GB RAM. Farla excluded incompatible catalog entries based on your setup.";
+            : $"{recommendations.Count} audited changes are waiting for review.";
+        AnalysisDescriptionText.Text = $"Detected {Compact(profile.Cpu)}, {Compact(profile.Gpu)}, {profile.RamGb} GB RAM. Farla excluded incompatible or unaudited catalog entries based on your setup.";
         CopilotStatusText.Text = recommendations.Count == 0
-            ? "Profile analyzed. Farla has no compatible action requiring your attention."
-            : $"Profile analyzed. {recommendations.Count} recommendations are ready to review.";
+            ? "Profile analyzed. Farla has no compatible audited action requiring your attention."
+            : $"Profile analyzed. {recommendations.Count} audited recommendation{(recommendations.Count == 1 ? "" : "s")} are ready to review.";
         ReviewRecommendationsButton.IsEnabled = recommendations.Count > 0;
+    }
+
+    private async void CopilotTimer_OnTick(object? sender, EventArgs e)
+    {
+        if (_profile is null || _analysisRunning)
+            return;
+
+        try
+        {
+            var sample = await Task.Run(_copilotSampler.Sample);
+            var observation = _copilotEngine.Observe(sample);
+
+            CopilotStatusText.Foreground = observation.State == "attention"
+                ? (System.Windows.Media.Brush)FindResource("FarlaWarning")
+                : (System.Windows.Media.Brush)FindResource("FarlaMuted");
+
+            if (observation.State == "normal")
+            {
+                CopilotStatusText.Text = _recommendationCount > 0
+                    ? $"{observation.Title}. {_recommendationCount} audited recommendation{(_recommendationCount == 1 ? "" : "s")} ready to review."
+                    : observation.Detail;
+                return;
+            }
+
+            CopilotStatusText.Text = $"{observation.Title}. {observation.Detail}";
+        }
+        catch
+        {
+            // Background Copilot observation is best-effort and must never affect the main app.
+        }
     }
 
     private static int CalculateScore(SystemProfile profile)
@@ -245,5 +287,11 @@ public partial class MainWindow : Window
     private void CloseButton_OnClick(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void MainWindow_OnClosed(object? sender, EventArgs e)
+    {
+        _copilotTimer.Stop();
+        _copilotSampler.Dispose();
     }
 }
