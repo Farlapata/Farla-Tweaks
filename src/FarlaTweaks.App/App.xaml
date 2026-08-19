@@ -3,30 +3,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <SolidColorBrush x:Key="FarlaBackground" Color="#0A0C10" />
-        <SolidColorBrush x:Key="FarlaSurface" Color="#10141B" />
-        <SolidColorBrush x:Key="FarlaSurfaceAlt" Color="#151A22" />
-        <SolidColorBrush x:Key="FarlaBorder" Color="#242B35" />
-        <SolidColorBrush x:Key="FarlaText" Color="#F2F4F7" />
-        <SolidColorBrush x:Key="FarlaMuted" Color="#8B93A1" />
-        <SolidColorBrush x:Key="FarlaAccent" Color="#A4BFA7" />
-        <SolidColorBrush x:Key="FarlaAccentSoft" Color="#6F826F" />
-        <SolidColorBrush x:Key="FarlaSuccess" Color="#A4BFA7" />
-        <SolidColorBrush x:Key="FarlaWarning" Color="#CDB77B" />
-        <SolidColorBrush x:Key="FarlaDanger" Color="#C98282" />
+        <SolidColorBrush x:Key="FarlaBackground" Color="#080A0D" />
+        <SolidColorBrush x:Key="FarlaSurface" Color="#0E1116" />
+        <SolidColorBrush x:Key="FarlaSurfaceAlt" Color="#12161B" />
+        <SolidColorBrush x:Key="FarlaBorder" Color="#1D232C" />
+        <SolidColorBrush x:Key="FarlaText" Color="#F1F3F5" />
+        <SolidColorBrush x:Key="FarlaMuted" Color="#858D99" />
+        <SolidColorBrush x:Key="FarlaAccent" Color="#C4CCC4" />
+        <SolidColorBrush x:Key="FarlaAccentSoft" Color="#6E776F" />
+        <SolidColorBrush x:Key="FarlaSuccess" Color="#93A493" />
+        <SolidColorBrush x:Key="FarlaWarning" Color="#C6B06F" />
+        <SolidColorBrush x:Key="FarlaDanger" Color="#C77D7D" />
 
         <Style x:Key="NavButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="{StaticResource FarlaMuted}" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="14,8" />
-            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontSize" Value="12" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                                CornerRadius="8"
+                                CornerRadius="7"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
@@ -36,29 +36,35 @@
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Foreground" Value="{StaticResource FarlaText}" />
-                    <Setter Property="Background" Value="#151A22" />
+                    <Setter Property="Background" Value="#11151A" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.45" />
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="ActiveNavButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
             <Setter Property="Foreground" Value="{StaticResource FarlaText}" />
-            <Setter Property="Background" Value="#151A22" />
+            <Setter Property="Background" Value="#12161B" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="BorderBrush" Value="{StaticResource FarlaAccentSoft}" />
+            <Setter Property="BorderBrush" Value="#343B45" />
             <Setter Property="BorderThickness" Value="0,0,0,1" />
         </Style>
 
         <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
-            <Setter Property="Background" Value="#1A211B" />
+            <Setter Property="Background" Value="#171C19" />
             <Setter Property="Foreground" Value="{StaticResource FarlaText}" />
-            <Setter Property="BorderBrush" Value="{StaticResource FarlaAccentSoft}" />
+            <Setter Property="BorderBrush" Value="#465047" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="16,10" />
+            <Setter Property="Padding" Value="15,9" />
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#222C23" />
-                    <Setter Property="BorderBrush" Value="{StaticResource FarlaAccent}" />
+                    <Setter Property="Background" Value="#1C241F" />
+                    <Setter Property="BorderBrush" Value="{StaticResource FarlaAccentSoft}" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.45" />
                 </Trigger>
             </Style.Triggers>
         </Style>
