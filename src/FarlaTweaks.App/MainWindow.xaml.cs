@@ -15,9 +15,12 @@ public partial class MainWindow : Window
 {
     private readonly SystemProfileCollector _profileCollector = new();
     private readonly ProfileStore _profileStore = new();
+    private readonly UserPreferencesStore _preferencesStore = new();
     private readonly TweakCatalogLoader _catalogLoader = new();
     private readonly RecommendationEngine _recommendationEngine = new();
     private SystemProfile? _profile;
+    private UserPreferences? _preferences;
+    private bool _analysisRunning;
 
     public MainWindow()
     {
@@ -29,14 +32,30 @@ public partial class MainWindow : Window
     private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
     {
         Loaded -= MainWindow_OnLoaded;
+
         try
         {
+            _preferences = await _preferencesStore.LoadAsync();
             _profile = await _profileStore.LoadAsync();
+
+            if (_preferences is null || !_preferences.OnboardingCompleted)
+            {
+                var wizard = new SetupWizard { Owner = this };
+                var completed = wizard.ShowDialog() == true;
+                if (!completed)
+                    return;
+
+                _preferences = await _preferencesStore.LoadAsync();
+            }
+
             if (_profile is not null)
                 await ApplyProfileToDashboardAsync(_profile, persisted: true);
+            else
+                await AnalyzeAsync();
         }
         catch
         {
+            SystemStateText.Text = "READY";
         }
     }
 
@@ -53,11 +72,21 @@ public partial class MainWindow : Window
 
     private async void StartAnalysisButton_OnClick(object sender, RoutedEventArgs e)
     {
+        await AnalyzeAsync();
+    }
+
+    private async Task AnalyzeAsync()
+    {
+        if (_analysisRunning)
+            return;
+
+        _analysisRunning = true;
         StartAnalysisButton.IsEnabled = false;
         StartAnalysisButton.Content = "ANALYZING...";
-        AnalysisDescriptionText.Text = "Reading your system. No settings are being changed.";
+        ReviewRecommendationsButton.IsEnabled = false;
         ScoreStatusText.Text = "ANALYZING";
-        CopilotStatusText.Text = "Reading your system profile.";
+        SystemStateText.Text = "SCANNING";
+        CopilotStatusText.Text = "Reading your system. Nothing is being changed.";
 
         try
         {
@@ -68,61 +97,95 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             ScoreStatusText.Text = "SCAN FAILED";
-            ScoreDescriptionText.Text = "Farla could not complete the system scan.";
+            SystemStateText.Text = "ERROR";
             AnalysisDescriptionText.Text = ex.Message;
             CopilotStatusText.Text = "Analysis failed. No changes were made.";
-            StartAnalysisButton.IsEnabled = true;
             StartAnalysisButton.Content = "TRY AGAIN";
-            return;
         }
-
-        StartAnalysisButton.Content = "SYSTEM ANALYZED";
+        finally
+        {
+            _analysisRunning = false;
+            StartAnalysisButton.IsEnabled = true;
+            if (StartAnalysisButton.Content.ToString() == "ANALYZING...")
+                StartAnalysisButton.Content = "REFRESH ANALYSIS";
+        }
     }
 
     private async Task ApplyProfileToDashboardAsync(SystemProfile profile, bool persisted)
     {
+        var preferences = _preferences ?? new UserPreferences();
+        var primaryGame = string.IsNullOrWhiteSpace(preferences.PrimaryGame) ? "Fortnite" : preferences.PrimaryGame;
+        PrimaryGameText.Text = primaryGame;
+        GameStatusText.Text = $"{primaryGame.ToUpperInvariant()}  /  READYING";
+
+        var effectiveCapabilities = profile.Capabilities
+            .Concat(preferences.Dependencies)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var effectiveProfile = profile with { Capabilities = effectiveCapabilities };
+        var tweaks = await _catalogLoader.LoadAsync();
+        var recommendations = _recommendationEngine.Build(effectiveProfile, tweaks, effectiveCapabilities);
+
+        var score = CalculateScore(profile);
+        ScoreText.Text = score.ToString();
         ScoreStatusText.Text = "ANALYZED";
+        SystemStateText.Text = "READY";
         ScoreDescriptionText.Text = persisted
-            ? "Farla remembered your last system analysis. Refresh it whenever your hardware or Windows setup changes."
-            : "System profile captured. Farla is ready to evaluate compatibility and recommendations.";
-        AnalysisDescriptionText.Text = BuildProfileSummary(profile);
+            ? "Farla remembered this system profile. Refresh the analysis after hardware or Windows changes."
+            : "System profile captured. The score describes system readiness, not guaranteed FPS.";
 
-        PerformanceValueText.Text = $"Performance   {profile.RamGb} GB RAM";
-        StabilityValueText.Text = $"Stability        {profile.Architecture}";
-        GamingValueText.Text = $"Gaming          {profile.Gpu}";
-        NetworkValueText.Text = $"Network        {profile.OsVersion}";
+        CpuText.Text = $"CPU  {Compact(profile.Cpu)}";
+        GpuText.Text = $"GPU  {Compact(profile.Gpu)}";
+        MemoryText.Text = $"MEMORY  {profile.RamGb} GB  ·  {profile.Architecture}";
+        DisplayText.Text = $"DISPLAY  {Compact(profile.PrimaryDisplay)}  ·  {profile.RefreshRateHz} Hz";
 
-        try
-        {
-            var tweaks = await _catalogLoader.LoadAsync();
-            var recommendations = _recommendationEngine.Build(profile, tweaks, Array.Empty<string>());
-            RecommendationEyebrowText.Text = "RECOMMENDATION ENGINE";
-            RecommendationTitleText.Text = recommendations.Count == 0
-                ? "No compatible recommendations yet."
-                : $"{recommendations.Count} compatible recommendations are ready to review.";
-            AnalysisDescriptionText.Text = $"{BuildProfileSummary(profile)} Farla found {recommendations.Count} compatible catalog entries and did not apply any of them.";
-            CopilotStatusText.Text = recommendations.Count == 0
-                ? "Monitoring your system. Nothing requires action yet."
-                : "Profile analyzed. Recommendations are ready for review.";
-        }
-        catch
-        {
-            RecommendationEyebrowText.Text = "RECOMMENDATION ENGINE";
-            RecommendationTitleText.Text = "System analyzed. Recommendation catalog unavailable.";
-            CopilotStatusText.Text = "Profile captured. Recommendation engine needs attention.";
-        }
+        var performance = Clamp(45 + Math.Min(profile.RamGb, 32) + (IsKnown(profile.Gpu) ? 12 : 0));
+        var stability = Clamp(profile.Architecture.Equals("X64", StringComparison.OrdinalIgnoreCase) ? 92 : 72);
+        var gaming = Clamp((profile.RefreshRateHz >= 144 ? 92 : profile.RefreshRateHz >= 120 ? 86 : 70) + (IsKnown(profile.Gpu) ? 4 : 0));
+        var network = 80;
 
-        StartAnalysisButton.IsEnabled = true;
-        StartAnalysisButton.Content = "REFRESH SYSTEM ANALYSIS";
+        PerformanceBar.Value = performance;
+        StabilityBar.Value = stability;
+        GamingBar.Value = gaming;
+        NetworkBar.Value = network;
+        PerformanceValueText.Text = $"{performance}";
+        StabilityValueText.Text = $"{stability}";
+        GamingValueText.Text = $"{gaming}";
+        NetworkValueText.Text = $"{network}";
+
+        RecommendationTitleText.Text = recommendations.Count == 0
+            ? "No compatible changes are waiting for review."
+            : $"{recommendations.Count} compatible changes are waiting for review.";
+        AnalysisDescriptionText.Text = $"Detected {Compact(profile.Cpu)}, {Compact(profile.Gpu)}, {profile.RamGb} GB RAM. Farla excluded incompatible catalog entries based on your setup.";
+        CopilotStatusText.Text = recommendations.Count == 0
+            ? "Profile analyzed. Farla has no compatible action requiring your attention."
+            : $"Profile analyzed. {recommendations.Count} recommendations are ready to review.";
+        ReviewRecommendationsButton.IsEnabled = recommendations.Count > 0;
     }
 
-    private static string BuildProfileSummary(SystemProfile profile)
+    private static int CalculateScore(SystemProfile profile)
     {
-        var cpu = string.IsNullOrWhiteSpace(profile.Cpu) ? "Unknown CPU" : profile.Cpu;
-        var gpu = string.IsNullOrWhiteSpace(profile.Gpu) ? "Unknown GPU" : profile.Gpu;
-        var memory = profile.RamGb > 0 ? $"{profile.RamGb} GB RAM" : "RAM unavailable";
-        return $"Detected {cpu}, {gpu}, {memory}. Nothing was modified.";
+        var score = 50;
+        score += Math.Min(profile.RamGb, 32);
+        if (profile.Architecture.Equals("X64", StringComparison.OrdinalIgnoreCase))
+            score += 8;
+        if (IsKnown(profile.Cpu))
+            score += 4;
+        if (IsKnown(profile.Gpu))
+            score += 6;
+        if (profile.RefreshRateHz >= 144)
+            score += 5;
+        else if (profile.RefreshRateHz >= 120)
+            score += 3;
+        return Clamp(score);
     }
+
+    private static bool IsKnown(string value) => !string.IsNullOrWhiteSpace(value) && !value.Equals("Unknown", StringComparison.OrdinalIgnoreCase);
+
+    private static string Compact(string value) => string.IsNullOrWhiteSpace(value) ? "Unknown" : value;
+
+    private static int Clamp(int value) => Math.Clamp(value, 0, 100);
 
     private void OptimizeButton_OnClick(object sender, RoutedEventArgs e)
     {
@@ -134,6 +197,25 @@ public partial class MainWindow : Window
     {
         var history = new HistoryWindow { Owner = this };
         history.ShowDialog();
+    }
+
+    private void SetupButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var wizard = new SetupWizard { Owner = this };
+        if (wizard.ShowDialog() == true)
+            _ = ReloadAfterSetupAsync();
+    }
+
+    private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var settings = new SettingsWindow { Owner = this };
+        settings.ShowDialog();
+    }
+
+    private async Task ReloadAfterSetupAsync()
+    {
+        _preferences = await _preferencesStore.LoadAsync();
+        await AnalyzeAsync();
     }
 
     private void WindowDragArea_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
