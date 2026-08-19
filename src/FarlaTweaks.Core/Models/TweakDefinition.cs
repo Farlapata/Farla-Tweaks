@@ -8,6 +8,14 @@ public enum RiskLevel
     Rejected
 }
 
+public enum AuditStatus
+{
+    Audited,
+    NeedsReview,
+    Quarantined,
+    Rejected
+}
+
 public sealed record RegistryChange(
     string Root,
     string KeyPath,
@@ -23,8 +31,12 @@ public sealed record TweakDefinition
     public string Description { get; init; } = string.Empty;
     public string Purpose { get; init; } = string.Empty;
     public RiskLevel Risk { get; init; } = RiskLevel.Safe;
+    public AuditStatus AuditStatus { get; init; } = AuditStatus.NeedsReview;
     public bool RequiresRestart { get; init; }
     public string RequiredOsFamily { get; init; } = "Windows";
+    public string SourceName { get; init; } = string.Empty;
+    public string SourceUrl { get; init; } = string.Empty;
+    public string AuditNotes { get; init; } = string.Empty;
     public IReadOnlyList<string> Tags { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> Dependencies { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> Conflicts { get; init; } = Array.Empty<string>();
