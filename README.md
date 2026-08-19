@@ -1,30 +1,59 @@
 # Farla Tweaks
 
-Farla Tweaks is a Windows-first performance and system companion built around explainable, reversible optimization.
+Farla Tweaks is a Windows performance companion built around **explainable, reversible optimization**.
 
-## Current milestone
+Farla is not designed as a giant button panel that blindly applies a stack of registry values. It profiles the PC, learns the user's dependencies, filters incompatible or unaudited changes, explains recommendations, and keeps rollback state for changes it actually applies.
 
-The repository now contains the core domain models, compatibility engine, registry snapshot/revert foundation, and the first WPF dashboard shell.
+## Current product state
 
-## Principles
+`0.2.0-alpha.1` commercialization candidate.
+
+The current build contains:
+
+- First-run setup wizard with persistent user preferences
+- Windows hardware and system profiling
+- Compatibility-aware audited tweak recommendations
+- Explicit review before registry changes
+- Transactional registry apply and rollback
+- History with per-change and full rollback
+- Read-only Windows health diagnostics
+- Live CPU, memory, and optional NVIDIA GPU telemetry
+- Rule-based Copilot observations
+- Fortnite process detection and local session history
+- Settings and local data controls
+- Versioned Windows x64 build and installer pipeline
+- SHA-256 executable checksum generation
+
+## Product principles
 
 - Never blindly apply every tweak.
-- Every system change must be explainable and reversible.
+- Every shipped system change must be explainable and reversible.
 - Dependencies and conflicts are first-class data.
-- The user should see what Farla is doing.
-- The database should be readable by developers.
-- Suspicious or obfuscated source material stays quarantined.
+- Unaudited, quarantined, or rejected content never reaches the recommendation engine.
+- Third-party utilities do not become part of the product just because they were found in an old tweak pack.
+- No runtime downloading of hidden scripts or binaries.
+- Performance claims must be measurable. Farla does not promise a guaranteed FPS increase.
+- Developers should be able to read the tweak database and understand why every entry exists.
 
-## Development
+## Release channels
 
-The first production milestones are:
+- `dev` for active development
+- `alpha` for internal testing
+- `beta` for invited testers and creators
+- `stable` for paid public distribution
 
-1. System detection and profile creation.
-2. Structured tweak database loading.
-3. Safe apply, verification and rollback.
-4. Setup Wizard and compatibility rules.
-5. Diagnostics and health checks.
-6. Fortnite profile and session monitoring.
-7. Copilot and adaptive investigations.
+## Build
 
-See `docs/ARCHITECTURE.md` and `docs/TWEAK_DATABASE.md` for the current design.
+The project targets Windows x64 and is built on a Windows GitHub Actions runner. The release workflow produces a self-contained single-file EXE, SHA-256 checksum, and Inno Setup installer artifact.
+
+## Commercial boundary
+
+The client-side architecture already separates optimization logic from licensing. Development builds use a local development license provider. The eventual stable release will use a remote activation service and signed distribution artifacts.
+
+See:
+
+- `docs/ARCHITECTURE.md`
+- `docs/TWEAK_DATABASE.md`
+- `docs/COMMERCIALIZATION.md`
+- `SECURITY.md`
+- `installer/FarlaTweaks.iss`
