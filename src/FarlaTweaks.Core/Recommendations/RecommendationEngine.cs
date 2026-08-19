@@ -14,7 +14,7 @@ public sealed class RecommendationEngine
 
         foreach (var tweak in tweaks)
         {
-            if (tweak.Risk == RiskLevel.Rejected)
+            if (tweak.Risk == RiskLevel.Rejected || tweak.RegistryChanges.Count == 0)
                 continue;
 
             var result = _compatibilityEngine.Evaluate(tweak, profile, selected);
@@ -43,10 +43,7 @@ public sealed class RecommendationEngine
     {
         if (tweak.Tags.Contains("capture", StringComparer.OrdinalIgnoreCase) &&
             selected.Contains("game-bar-unused"))
-            return "You indicated that Game Bar capture is not needed, so Farla can consider reducing related background activity.";
-
-        if (tweak.Tags.Contains("startup", StringComparer.OrdinalIgnoreCase))
-            return "Farla found a safe review opportunity instead of automatically disabling unknown startup software.";
+            return "You indicated that Game Bar capture is not needed, so Farla can disable its background DVR capture values. Game Bar itself remains available.";
 
         return tweak.Purpose;
     }
