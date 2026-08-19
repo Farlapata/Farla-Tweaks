@@ -7,15 +7,11 @@
         AllowsTransparency="True"
         Background="Transparent"
         Width="760"
-        Height="620"
+        Height="650"
         WindowStartupLocation="CenterOwner">
     <Border Background="{StaticResource FarlaBackground}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14">
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="70" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="68" />
-            </Grid.RowDefinitions>
+            <Grid.RowDefinitions><RowDefinition Height="70" /><RowDefinition Height="*" /><RowDefinition Height="68" /></Grid.RowDefinitions>
             <Grid Grid.Row="0" MouseLeftButtonDown="DragArea_OnMouseLeftButtonDown">
                 <StackPanel VerticalAlignment="Center" Margin="26,0,0,0">
                     <TextBlock Text="SETTINGS" Foreground="{StaticResource FarlaText}" FontSize="20" FontWeight="SemiBold" />
@@ -28,20 +24,13 @@
                     <TextBlock Text="YOUR SETUP" Foreground="{StaticResource FarlaMuted}" FontSize="11" FontWeight="SemiBold" />
                     <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,10,0,0">
                         <Grid>
-                            <StackPanel>
-                                <TextBlock Text="Setup Wizard" Foreground="{StaticResource FarlaText}" FontSize="14" FontWeight="SemiBold" />
-                                <TextBlock Text="Change your game, goals, and software dependencies." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,4,0,0" />
-                            </StackPanel>
+                            <StackPanel><TextBlock Text="Setup Wizard" Foreground="{StaticResource FarlaText}" FontSize="14" FontWeight="SemiBold" /><TextBlock Text="Change your game, goals, and software dependencies." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,4,0,0" /></StackPanel>
                             <Button Content="OPEN WIZARD" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource PrimaryButtonStyle}" Click="OpenWizardButton_OnClick" />
                         </Grid>
                     </Border>
-
                     <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,10,0,0">
                         <Grid>
-                            <StackPanel>
-                                <TextBlock Text="System diagnostics" Foreground="{StaticResource FarlaText}" FontSize="14" FontWeight="SemiBold" />
-                                <TextBlock Text="Run read-only Windows integrity checks." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,4,0,0" />
-                            </StackPanel>
+                            <StackPanel><TextBlock Text="System diagnostics" Foreground="{StaticResource FarlaText}" FontSize="14" FontWeight="SemiBold" /><TextBlock Text="Run read-only Windows integrity checks." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,4,0,0" /></StackPanel>
                             <Button Content="OPEN DIAGNOSTICS" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource NavButtonStyle}" Click="OpenDiagnosticsButton_OnClick" />
                         </Grid>
                     </Border>
@@ -49,24 +38,29 @@
                     <TextBlock Text="LOCAL DATA" Foreground="{StaticResource FarlaMuted}" FontSize="11" FontWeight="SemiBold" Margin="0,24,0,0" />
                     <Border Background="{StaticResource FarlaSurface}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,10,0,0">
                         <StackPanel>
-                            <TextBlock Text="Farla stores system profile, preferences, and rollback snapshots locally." Foreground="{StaticResource FarlaText}" FontSize="13" TextWrapping="Wrap" />
+                            <TextBlock Text="Farla stores system profile, preferences, game sessions, and rollback snapshots locally." Foreground="{StaticResource FarlaText}" FontSize="13" TextWrapping="Wrap" />
                             <TextBlock Text="%LOCALAPPDATA%\Farla" Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,7,0,0" />
                         </StackPanel>
                     </Border>
 
                     <TextBlock Text="RELEASE" Foreground="{StaticResource FarlaMuted}" FontSize="11" FontWeight="SemiBold" Margin="0,24,0,0" />
                     <Grid Margin="0,10,0,0">
-                        <TextBlock Text="Farla Tweaks Alpha 0.1" Foreground="{StaticResource FarlaText}" FontSize="13" />
+                        <TextBlock Text="Farla Tweaks 0.2.0-alpha.1" Foreground="{StaticResource FarlaText}" FontSize="13" />
                         <TextBlock Text="Windows x64" Foreground="{StaticResource FarlaMuted}" FontSize="12" HorizontalAlignment="Right" />
                     </Grid>
+
+                    <TextBlock Text="COMMERCIAL LICENSE" Foreground="{StaticResource FarlaMuted}" FontSize="11" FontWeight="SemiBold" Margin="0,24,0,0" />
+                    <Border Background="{StaticResource FarlaSurfaceAlt}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,10,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Alpha licensing is disabled for this test build." Foreground="{StaticResource FarlaText}" FontSize="13" />
+                            <TextBlock Text="The stable release will use a signed activation flow and a separate licensing service. No master license secret will be shipped in the client." Foreground="{StaticResource FarlaMuted}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
             <Border Grid.Row="2" Background="#0B0E12" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="0,1,0,0">
                 <Grid Margin="26,0">
-                    <TextBlock Text="Commercial release will add account/licensing controls here."
-                               Foreground="{StaticResource FarlaMuted}"
-                               FontSize="11"
-                               VerticalAlignment="Center" />
+                    <TextBlock Text="Builds are versioned so test results can be tied to a specific release." Foreground="{StaticResource FarlaMuted}" FontSize="11" VerticalAlignment="Center" />
                     <Button Content="DONE" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="CloseButton_OnClick" />
                 </Grid>
             </Border>
