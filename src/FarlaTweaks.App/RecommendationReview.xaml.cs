@@ -60,11 +60,11 @@ public partial class RecommendationReview : Window
             RecommendedCountText.Text = recommendations.Count.ToString();
             RestartCountText.Text = recommendations.Count(r => r.RequiresRestart).ToString();
             ProfileStatusText.Text = preferences.Dependencies.Contains("crosshair-x", StringComparer.OrdinalIgnoreCase)
-                ? "Crosshair X was detected in your setup profile. Farla will not disable Game Bar itself."
+                ? "Crosshair X is in your profile. Farla preserves Game Bar itself and only changes captured DVR values when you explicitly allow it."
                 : "Based on your saved system profile and setup dependencies.";
 
             foreach (var recommendation in recommendations)
-                AddRecommendationCard(recommendation);
+                AddRecommendationCard(recommendation, tweaks.First(t => t.Id.Equals(recommendation.TweakId, StringComparison.OrdinalIgnoreCase)));
 
             UpdateApplyState();
         }
@@ -74,7 +74,7 @@ public partial class RecommendationReview : Window
         }
     }
 
-    private void AddRecommendationCard(Recommendation recommendation)
+    private void AddRecommendationCard(Recommendation recommendation, TweakDefinition tweak)
     {
         var check = new CheckBox
         {
@@ -100,6 +100,15 @@ public partial class RecommendationReview : Window
             Margin = new Thickness(0, 4, 0, 0)
         };
 
+        var audit = new TextBlock
+        {
+            Text = $"AUDITED  ·  {tweak.SourceName}",
+            Foreground = (System.Windows.Media.Brush)FindResource("FarlaSuccess"),
+            FontSize = 10,
+            FontWeight = FontWeights.SemiBold,
+            Margin = new Thickness(0, 7, 0, 0)
+        };
+
         var risk = new TextBlock
         {
             Text = recommendation.RequiresRestart
@@ -110,12 +119,13 @@ public partial class RecommendationReview : Window
                 : (System.Windows.Media.Brush)FindResource("FarlaWarning"),
             FontSize = 10,
             FontWeight = FontWeights.SemiBold,
-            Margin = new Thickness(0, 8, 0, 0)
+            Margin = new Thickness(0, 4, 0, 0)
         };
 
         var content = new StackPanel();
         content.Children.Add(title);
         content.Children.Add(reason);
+        content.Children.Add(audit);
         content.Children.Add(risk);
         check.Content = content;
         check.DataContext = recommendation;
