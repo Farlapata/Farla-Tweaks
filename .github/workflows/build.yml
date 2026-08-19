@@ -53,20 +53,30 @@ jobs:
 
       - name: Build installer
         shell: pwsh
-        run: '& "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe" "installer\FarlaTweaks.iss"'
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path $iscc)) {
+            throw "Inno Setup compiler not found at $iscc"
+          }
+          & $iscc 'installer\FarlaTweaks.iss'
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
 
       - name: Upload standalone Windows build
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: FarlaTweaks-Windows-x64
           path: |
             artifacts/FarlaTweaks/FarlaTweaks.exe
             artifacts/FarlaTweaks/FarlaTweaks.exe.sha256
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Upload Windows installer
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: FarlaTweaks-Windows-x64-Installer
           path: artifacts/installer/*.exe
-          if-no-files-found: error
+          if-no-files-found: warn
