@@ -37,9 +37,9 @@ public partial class HistoryWindow : Window
                 Background = (System.Windows.Media.Brush)FindResource("FarlaSurface"),
                 BorderBrush = (System.Windows.Media.Brush)FindResource("FarlaBorder"),
                 BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(12),
+                CornerRadius = new CornerRadius(10),
                 Padding = new Thickness(16),
-                Margin = new Thickness(0, 0, 0, 12)
+                Margin = new Thickness(0, 0, 0, 10)
             };
 
             var grid = new System.Windows.Controls.Grid();
@@ -99,10 +99,41 @@ public partial class HistoryWindow : Window
         {
             await _executor.RevertAsync(snapshot);
             StatusText.Text = $"Reverted '{snapshot.Label}'.";
+            await RefreshAsync();
         }
         catch (Exception ex)
         {
             StatusText.Text = $"Rollback failed: {ex.Message}";
+        }
+    }
+
+    private async void RevertAllButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var snapshots = await _store.LoadAllAsync();
+        if (snapshots.Count == 0)
+        {
+            StatusText.Text = "There are no Farla changes to revert.";
+            return;
+        }
+
+        var result = MessageBox.Show(
+            $"Revert all {snapshots.Count} Farla snapshots? This restores the recorded state before Farla's changes.",
+            "Confirm full rollback",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes)
+            return;
+
+        try
+        {
+            var service = new RollbackService(_store, _executor);
+            var reverted = await service.RevertAllAsync();
+            StatusText.Text = $"Reverted {reverted} Farla snapshot{(reverted == 1 ? "" : "s")}.";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Full rollback failed: {ex.Message}";
         }
     }
 
