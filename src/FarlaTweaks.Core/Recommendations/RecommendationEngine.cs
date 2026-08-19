@@ -14,7 +14,9 @@ public sealed class RecommendationEngine
 
         foreach (var tweak in tweaks)
         {
-            if (tweak.Risk == RiskLevel.Rejected || tweak.RegistryChanges.Count == 0)
+            if (tweak.Risk == RiskLevel.Rejected ||
+                tweak.AuditStatus != AuditStatus.Audited ||
+                tweak.RegistryChanges.Count == 0)
                 continue;
 
             var result = _compatibilityEngine.Evaluate(tweak, profile, selected);
