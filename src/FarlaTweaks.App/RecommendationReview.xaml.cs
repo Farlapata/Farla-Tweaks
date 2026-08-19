@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using FarlaTweaks.Core.Database;
-using FarlaTweaks.Core.Diagnostics;
+using FarlaTweaks.Core.Execution;
 using FarlaTweaks.Core.Models;
 using FarlaTweaks.Core.Persistence;
 using FarlaTweaks.Core.Recommendations;
@@ -11,9 +11,12 @@ namespace FarlaTweaks.App;
 public partial class RecommendationReview : Window
 {
     private readonly ProfileStore _profileStore = new();
+    private readonly SnapshotStore _snapshotStore = new();
     private readonly TweakCatalogLoader _catalogLoader = new();
     private readonly RecommendationEngine _recommendationEngine = new();
+    private readonly ITweakExecutor _executor = new WindowsRegistryTweakExecutor();
     private readonly List<CheckBox> _selectionBoxes = new();
+    private readonly Dictionary<string, TweakDefinition> _tweaksById = new(StringComparer.OrdinalIgnoreCase);
 
     public RecommendationReview()
     {
@@ -24,100 +27,161 @@ public partial class RecommendationReview : Window
     private async void RecommendationReview_OnLoaded(object sender, RoutedEventArgs e)
     {
         Loaded -= RecommendationReview_OnLoaded;
-        var profile = await _profileStore.LoadAsync();
-        if (profile is null)
+        try
         {
-            ProfileStatusText.Text = "Run a system analysis first.";
+            var profile = await _profileStore.LoadAsync();
+            if (profile is null)
+            {
+                ProfileStatusText.Text = "Run a system analysis first.";
+                return;
+            }
+
+            var tweaks = await _catalogLoader.LoadAsync();
+            var recommendations = _recommendationEngine.Build(profile, tweaks, new[] { "game-bar-unused" });
+            _tweaksById.Clear();
+            foreach (var tweak in tweaks)
+                _tweaksById[tweak.Id] = tweak;
+
+            RecommendedCountText.Text = recommendations.Count.ToString();
+            RestartCountText.Text = recommendations.Count(r => r.RequiresRestart).ToString();
+            ProfileStatusText.Text = "Based on your saved system profile. Game Bar capture is treated as unused until you confirm otherwise.";
+
+            foreach (var recommendation in recommendations)
+                AddRecommendationCard(recommendation);
+
+            UpdateApplyState();
+        }
+        catch (Exception ex)
+        {
+            ProfileStatusText.Text = $"Unable to load recommendations: {ex.Message}";
+        }
+    }
+
+    private void AddRecommendationCard(Recommendation recommendation)
+    {
+        var check = new CheckBox
+        {
+            IsChecked = recommendation.Risk == RiskLevel.Safe,
+            Margin = new Thickness(0),
+            Cursor = System.Windows.Input.Cursors.Hand
+        };
+
+        var title = new TextBlock
+        {
+            Text = recommendation.Title,
+            Foreground = (System.Windows.Media.Brush)FindResource("FarlaText"),
+            FontSize = 14,
+            FontWeight = FontWeights.SemiBold
+        };
+
+        var reason = new TextBlock
+        {
+            Text = recommendation.Reason,
+            Foreground = (System.Windows.Media.Brush)FindResource("FarlaMuted"),
+            FontSize = 12,
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 4, 0, 0)
+        };
+
+        var risk = new TextBlock
+        {
+            Text = recommendation.RequiresRestart
+                ? $"{recommendation.Risk.ToString().ToUpperInvariant()}  ·  RESTART"
+                : recommendation.Risk.ToString().ToUpperInvariant(),
+            Foreground = recommendation.Risk == RiskLevel.Safe
+                ? (System.Windows.Media.Brush)FindResource("FarlaSuccess")
+                : (System.Windows.Media.Brush)FindResource("FarlaWarning"),
+            FontSize = 10,
+            FontWeight = FontWeights.SemiBold,
+            Margin = new Thickness(0, 8, 0, 0)
+        };
+
+        var content = new StackPanel();
+        content.Children.Add(title);
+        content.Children.Add(reason);
+        content.Children.Add(risk);
+        check.Content = content;
+        check.DataContext = recommendation;
+        check.Checked += SelectionChanged;
+        check.Unchecked += SelectionChanged;
+
+        var card = new Border
+        {
+            Background = (System.Windows.Media.Brush)FindResource("FarlaSurface"),
+            BorderBrush = (System.Windows.Media.Brush)FindResource("FarlaBorder"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(12),
+            Padding = new Thickness(16),
+            Margin = new Thickness(0, 0, 0, 12),
+            Child = check
+        };
+
+        RecommendationList.Children.Add(card);
+        _selectionBoxes.Add(check);
+    }
+
+    private void SelectionChanged(object sender, RoutedEventArgs e) => UpdateApplyState();
+
+    private void UpdateApplyState()
+    {
+        var selected = _selectionBoxes.Any(x => x.IsChecked == true);
+        ApplySelectedButton.IsEnabled = selected && GameBarConfirmationBox.IsChecked == true;
+    }
+
+    private async void ApplySelectedButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (GameBarConfirmationBox.IsChecked != true)
             return;
-        }
 
-        var tweaks = await _catalogLoader.LoadAsync();
-        var recommendations = _recommendationEngine.Build(profile, tweaks, Array.Empty<string>());
-        RecommendedCountText.Text = recommendations.Count.ToString();
-        RestartCountText.Text = recommendations.Count(r => r.RequiresRestart).ToString();
-        ProfileStatusText.Text = "Based on your saved system profile.";
+        var selected = _selectionBoxes
+            .Where(x => x.IsChecked == true)
+            .Select(x => x.DataContext as Recommendation)
+            .Where(x => x is not null)
+            .Cast<Recommendation>()
+            .ToArray();
 
-        foreach (var recommendation in recommendations)
+        if (selected.Length == 0)
+            return;
+
+        ApplySelectedButton.IsEnabled = false;
+        ProfileStatusText.Text = "Applying selected audited changes...";
+
+        var applied = 0;
+        var failures = new List<string>();
+        foreach (var recommendation in selected)
         {
-            var check = new CheckBox
+            if (!_tweaksById.TryGetValue(recommendation.TweakId, out var tweak))
+                continue;
+
+            if (tweak.RegistryChanges.Count == 0)
+                continue;
+
+            try
             {
-                IsChecked = recommendation.Risk == RiskLevel.Safe,
-                Margin = new Thickness(0, 0, 0, 12),
-                Cursor = System.Windows.Input.Cursors.Hand
-            };
-
-            var title = new TextBlock
+                var snapshot = await _executor.ApplyAsync(tweak);
+                await _snapshotStore.SaveAsync(snapshot);
+                applied++;
+            }
+            catch (Exception ex)
             {
-                Text = recommendation.Title,
-                Foreground = (System.Windows.Media.Brush)FindResource("FarlaText"),
-                FontSize = 14,
-                FontWeight = FontWeights.SemiBold
-            };
-
-            var reason = new TextBlock
-            {
-                Text = recommendation.Reason,
-                Foreground = (System.Windows.Media.Brush)FindResource("FarlaMuted"),
-                FontSize = 12,
-                TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(0, 4, 0, 0)
-            };
-
-            var risk = new TextBlock
-            {
-                Text = recommendation.RequiresRestart
-                    ? $"{recommendation.Risk.ToString().ToUpperInvariant()}  ·  RESTART"
-                    : recommendation.Risk.ToString().ToUpperInvariant(),
-                Foreground = recommendation.Risk == RiskLevel.Safe
-                    ? (System.Windows.Media.Brush)FindResource("FarlaSuccess")
-                    : (System.Windows.Media.Brush)FindResource("FarlaWarning"),
-                FontSize = 10,
-                FontWeight = FontWeights.SemiBold,
-                Margin = new Thickness(0, 8, 0, 0)
-            };
-
-            var content = new StackPanel();
-            content.Children.Add(title);
-            content.Children.Add(reason);
-            content.Children.Add(risk);
-            check.Content = content;
-            check.DataContext = recommendation;
-            check.Checked += SelectionChanged;
-            check.Unchecked += SelectionChanged;
-
-            var card = new Border
-            {
-                Background = (System.Windows.Media.Brush)FindResource("FarlaSurface"),
-                BorderBrush = (System.Windows.Media.Brush)FindResource("FarlaBorder"),
-                BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(12),
-                Padding = new Thickness(16),
-                Child = check
-            };
-
-            RecommendationList.Children.Add(card);
-            _selectionBoxes.Add(check);
+                failures.Add($"{tweak.Name}: {ex.Message}");
+            }
         }
 
-        ApplySelectedButton.IsEnabled = _selectionBoxes.Any(x => x.IsChecked == true);
-    }
+        ProfileStatusText.Text = failures.Count == 0
+            ? $"Applied {applied} audited change{(applied == 1 ? "" : "s")}. Rollback snapshots were saved locally."
+            : $"Applied {applied}; {failures.Count} failed. No failed change was left partially applied.";
 
-    private void SelectionChanged(object sender, RoutedEventArgs e)
-    {
-        ApplySelectedButton.IsEnabled = _selectionBoxes.Any(x => x.IsChecked == true);
-    }
-
-    private void ApplySelectedButton_OnClick(object sender, RoutedEventArgs e)
-    {
         MessageBox.Show(
-            "The review flow is ready. Safe apply and rollback execution will be enabled once each selected tweak has an executable, verified change definition.",
-            "Farla Tweaks",
+            failures.Count == 0
+                ? $"Farla applied {applied} audited change{(applied == 1 ? "" : "s")} and saved rollback snapshots."
+                : string.Join(Environment.NewLine, failures),
+            failures.Count == 0 ? "Farla optimization complete" : "Farla optimization errors",
             MessageBoxButton.OK,
-            MessageBoxImage.Information);
+            failures.Count == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning);
+
+        UpdateApplyState();
     }
 
-    private void CloseButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        Close();
-    }
+    private void CloseButton_OnClick(object sender, RoutedEventArgs e) => Close();
 }
