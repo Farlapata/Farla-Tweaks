@@ -20,6 +20,7 @@ public partial class MainWindow : Window
     private readonly UserPreferencesStore _preferencesStore = new();
     private readonly TweakCatalogLoader _catalogLoader = new();
     private readonly RecommendationEngine _recommendationEngine = new();
+    private readonly FarlaLogger _logger = new();
     private readonly PerformanceSampler _copilotSampler = new();
     private readonly CopilotEngine _copilotEngine = new();
     private readonly DispatcherTimer _copilotTimer;
@@ -36,6 +37,7 @@ public partial class MainWindow : Window
         _copilotTimer.Tick += CopilotTimer_OnTick;
         Loaded += MainWindow_OnLoaded;
         Closed += MainWindow_OnClosed;
+        _logger.Info("Farla started.");
     }
 
     private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
@@ -49,6 +51,7 @@ public partial class MainWindow : Window
 
             if (_preferences is null || !_preferences.OnboardingCompleted)
             {
+                _logger.Info("Opening first-run setup wizard.");
                 var wizard = new SetupWizard { Owner = this };
                 var completed = wizard.ShowDialog() == true;
                 if (!completed)
@@ -64,8 +67,9 @@ public partial class MainWindow : Window
 
             _copilotTimer.Start();
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.Error("Main window initialization failed.", ex);
             SystemStateText.Text = "READY";
         }
     }
@@ -98,15 +102,18 @@ public partial class MainWindow : Window
         ScoreStatusText.Text = "ANALYZING";
         SystemStateText.Text = "SCANNING";
         CopilotStatusText.Text = "Reading your system. Nothing is being changed.";
+        _logger.Info("System analysis started.");
 
         try
         {
             _profile = await Task.Run(_profileCollector.Collect);
             await _profileStore.SaveAsync(_profile);
             await ApplyProfileToDashboardAsync(_profile, persisted: false);
+            _logger.Info("System analysis completed.");
         }
         catch (Exception ex)
         {
+            _logger.Error("System analysis failed.", ex);
             ScoreStatusText.Text = "SCAN FAILED";
             SystemStateText.Text = "ERROR";
             AnalysisDescriptionText.Text = ex.Message;
@@ -200,9 +207,9 @@ public partial class MainWindow : Window
 
             CopilotStatusText.Text = $"{observation.Title}. {observation.Detail}";
         }
-        catch
+        catch (Exception ex)
         {
-            // Background Copilot observation is best-effort and must never affect the main app.
+            _logger.Error("Background Copilot observation failed.", ex);
         }
     }
 
@@ -293,5 +300,6 @@ public partial class MainWindow : Window
     {
         _copilotTimer.Stop();
         _copilotSampler.Dispose();
+        _logger.Info("Farla closed.");
     }
 }
