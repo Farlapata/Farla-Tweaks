@@ -3,14 +3,14 @@
     "Id": "gaming.disable-unused-game-dvr",
     "Name": "Disable unused Game DVR capture",
     "Category": "Gaming",
-    "Description": "Stops background Game DVR capture when the user does not depend on Game Bar functionality.",
-    "Purpose": "Reduce unnecessary background capture activity.",
+    "Description": "Stops background Game DVR capture while keeping Xbox Game Bar available for overlays and dependencies.",
+    "Purpose": "Reduce unnecessary background capture activity without disabling the Game Bar component itself.",
     "Risk": "Safe",
     "RequiresRestart": false,
     "RequiredOsFamily": "Windows",
     "Tags": ["gaming", "background", "capture"],
     "Dependencies": ["game-bar-unused"],
-    "Conflicts": ["crosshair-x", "game-bar-required"],
+    "Conflicts": ["game-bar-required"],
     "RegistryChanges": [
       {
         "Root": "HKCU",
