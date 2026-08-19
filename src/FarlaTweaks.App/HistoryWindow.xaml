@@ -4,21 +4,22 @@
         WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False"
         AllowsTransparency="True" Background="Transparent"
         Width="900" Height="620" WindowStartupLocation="CenterOwner">
-    <Border Background="{StaticResource FarlaBackground}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="16">
+    <Border Background="{StaticResource FarlaBackground}" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="1" CornerRadius="14">
         <Grid>
             <Grid.RowDefinitions><RowDefinition Height="72"/><RowDefinition Height="*"/><RowDefinition Height="72"/></Grid.RowDefinitions>
             <StackPanel Margin="28,0,0,0" VerticalAlignment="Center">
                 <TextBlock Text="HISTORY" Foreground="{StaticResource FarlaText}" FontSize="22" FontWeight="SemiBold" />
-                <TextBlock Text="Changes Farla has actually applied." Foreground="{StaticResource FarlaMuted}" FontSize="13" Margin="0,4,0,0" />
+                <TextBlock Text="Changes Farla has actually applied. Every item can be rolled back." Foreground="{StaticResource FarlaMuted}" FontSize="13" Margin="0,4,0,0" />
             </StackPanel>
             <Button Grid.Row="0" Content="×" Width="42" Height="32" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" Style="{StaticResource NavButtonStyle}" Click="CloseButton_OnClick" />
-
             <ScrollViewer Grid.Row="1" Margin="28,0" VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="SnapshotList" />
             </ScrollViewer>
-
             <Border Grid.Row="2" Background="#0D1015" BorderBrush="{StaticResource FarlaBorder}" BorderThickness="0,1,0,0">
-                <TextBlock x:Name="StatusText" Margin="28,0" VerticalAlignment="Center" Foreground="{StaticResource FarlaMuted}" FontSize="12" />
+                <Grid Margin="28,0">
+                    <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{StaticResource FarlaMuted}" FontSize="12" />
+                    <Button Content="REVERT ALL FARLA CHANGES" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="RevertAllButton_OnClick" />
+                </Grid>
             </Border>
         </Grid>
     </Border>
