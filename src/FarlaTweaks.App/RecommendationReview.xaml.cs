@@ -11,6 +11,7 @@ namespace FarlaTweaks.App;
 public partial class RecommendationReview : Window
 {
     private readonly ProfileStore _profileStore = new();
+    private readonly UserPreferencesStore _preferencesStore = new();
     private readonly SnapshotStore _snapshotStore = new();
     private readonly TweakCatalogLoader _catalogLoader = new();
     private readonly RecommendationEngine _recommendationEngine = new();
@@ -30,21 +31,37 @@ public partial class RecommendationReview : Window
         try
         {
             var profile = await _profileStore.LoadAsync();
+            var preferences = await _preferencesStore.LoadAsync() ?? new UserPreferences();
             if (profile is null)
             {
                 ProfileStatusText.Text = "Run a system analysis first.";
                 return;
             }
 
+            var selectedDependencies = preferences.Dependencies.Count == 0
+                ? new[] { "game-bar-unused" }
+                : preferences.Dependencies.ToArray();
+            GameBarConfirmationBox.IsChecked = selectedDependencies.Contains("game-bar-unused", StringComparer.OrdinalIgnoreCase);
+
+            var effectiveProfile = profile with
+            {
+                Capabilities = profile.Capabilities
+                    .Concat(selectedDependencies)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray()
+            };
+
             var tweaks = await _catalogLoader.LoadAsync();
-            var recommendations = _recommendationEngine.Build(profile, tweaks, new[] { "game-bar-unused" });
+            var recommendations = _recommendationEngine.Build(effectiveProfile, tweaks, selectedDependencies);
             _tweaksById.Clear();
             foreach (var tweak in tweaks)
                 _tweaksById[tweak.Id] = tweak;
 
             RecommendedCountText.Text = recommendations.Count.ToString();
             RestartCountText.Text = recommendations.Count(r => r.RequiresRestart).ToString();
-            ProfileStatusText.Text = "Based on your saved system profile. Game Bar capture is treated as unused until you confirm otherwise.";
+            ProfileStatusText.Text = preferences.Dependencies.Contains("crosshair-x", StringComparer.OrdinalIgnoreCase)
+                ? "Crosshair X was detected in your setup profile. Farla will not disable Game Bar itself."
+                : "Based on your saved system profile and setup dependencies.";
 
             foreach (var recommendation in recommendations)
                 AddRecommendationCard(recommendation);
@@ -110,9 +127,9 @@ public partial class RecommendationReview : Window
             Background = (System.Windows.Media.Brush)FindResource("FarlaSurface"),
             BorderBrush = (System.Windows.Media.Brush)FindResource("FarlaBorder"),
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(12),
+            CornerRadius = new CornerRadius(10),
             Padding = new Thickness(16),
-            Margin = new Thickness(0, 0, 0, 12),
+            Margin = new Thickness(0, 0, 0, 10),
             Child = check
         };
 
@@ -153,9 +170,6 @@ public partial class RecommendationReview : Window
             if (!_tweaksById.TryGetValue(recommendation.TweakId, out var tweak))
                 continue;
 
-            if (tweak.RegistryChanges.Count == 0)
-                continue;
-
             try
             {
                 var snapshot = await _executor.ApplyAsync(tweak);
@@ -170,7 +184,7 @@ public partial class RecommendationReview : Window
 
         ProfileStatusText.Text = failures.Count == 0
             ? $"Applied {applied} audited change{(applied == 1 ? "" : "s")}. Rollback snapshots were saved locally."
-            : $"Applied {applied}; {failures.Count} failed. No failed change was left partially applied.";
+            : $"Applied {applied}; {failures.Count} failed. Failed changes were rolled back transactionally.";
 
         MessageBox.Show(
             failures.Count == 0
