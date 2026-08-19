@@ -126,11 +126,14 @@ public partial class MainWindow : Window
 
     private void OptimizeButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var review = new RecommendationReview
-        {
-            Owner = this
-        };
+        var review = new RecommendationReview { Owner = this };
         review.ShowDialog();
+    }
+
+    private void HistoryButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var history = new HistoryWindow { Owner = this };
+        history.ShowDialog();
     }
 
     private void WindowDragArea_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
